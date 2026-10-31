@@ -1,26 +1,354 @@
 @import "tailwindcss";
 
+/* Design tokens from the Figma file. Staff and Admin use two visual languages,
+   so the shared classes below read these variables instead of fixed values. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --page: #f3f6fb;
+  --success: #15704a;
+  --success-soft: #e2f4ea;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --input-border: #cbd5e1;
+  --table-head: #eef2f8;
+  --divider: #e8edf4;
+}
+
+.theme-staff {
+  --primary: #1755b3;
+  --primary-soft: #e8f1ff;
+  --ink: #0b1836;
+  --muted: #69758a;
+  --line: #e1e6ee;
+  --body-font: var(--font-dm-sans);
+  --card-radius: 1.4375rem;
+  --card-pad: 2.5rem;
+  --card-title-size: 2.25rem;
+  --card-title-weight: 400;
+  --card-title-font: var(--inter);
+  --card-sub-size: 1rem;
+  --field-h: 3.625rem;
+  --field-radius: 0.75rem;
+  --field-size: 1rem;
+  --label-size: 1rem;
+  --label-weight: 700;
+  --label-color: #34415b;
+  --btn-h: 3.25rem;
+  --btn-size: 1.125rem;
+  --title-size: 3rem;
+  --title-line: 3.75rem;
+  --sub-size: 1.5rem;
+  --eyebrow-size: 1.5rem;
+  --eyebrow-weight: 600;
+  --eyebrow-color: var(--primary);
+}
+
+.theme-admin {
+  --primary: #1e4fb8;
+  --primary-soft: #dbeafe;
+  --ink: #0f1f3d;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --body-font: var(--inter);
+  --card-radius: 1rem;
+  --card-pad: 1.5rem;
+  --card-title-size: 1rem;
+  --card-title-weight: 700;
+  --card-title-font: var(--inter);
+  --card-sub-size: 0.875rem;
+  --field-h: 2.75rem;
+  --field-radius: 0.625rem;
+  --field-size: 0.875rem;
+  --label-size: 0.75rem;
+  --label-weight: 500;
+  --label-color: #64748b;
+  --btn-h: 2.75rem;
+  --btn-size: 0.875rem;
+  --title-size: 2rem;
+  --title-line: 2.5rem;
+  --sub-size: 0.875rem;
+  --eyebrow-size: 0.75rem;
+  --eyebrow-weight: 400;
+  --eyebrow-color: var(--muted);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-page: var(--page);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-divider: var(--divider);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --font-sans: var(--body-font, var(--font-dm-sans)), Arial, Helvetica, sans-serif;
+  --font-display: var(--font-manrope), Arial, Helvetica, sans-serif;
+  --font-inter: var(--inter), Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* The Figma frames are 1920 x 1080. All sizes are in rem, so the whole layout
+   scales down with the screen and still fits a laptop. */
+html {
+  font-size: clamp(14px, 0.8333vw, 16px);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page);
+  color: #1e293b;
+  font-family: var(--font-sans);
+}
+
+@layer components {
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--card-radius);
+    box-shadow: 0 1px 1px rgb(18 37 82 / 5%);
+    padding: var(--card-pad);
+  }
+  .card-title {
+    color: var(--ink);
+    font-family: var(--card-title-font);
+    font-size: var(--card-title-size);
+    font-weight: var(--card-title-weight);
+    line-height: 1.25;
+  }
+  .card-sub {
+    color: var(--muted);
+    font-size: var(--card-sub-size);
+  }
+
+  .page-eyebrow {
+    color: var(--eyebrow-color);
+    font-family: var(--inter);
+    font-size: var(--eyebrow-size);
+    font-weight: var(--eyebrow-weight);
+  }
+  .page-title {
+    color: var(--ink);
+    font-family: var(--inter);
+    font-size: var(--title-size);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: var(--title-line);
+  }
+  .page-sub {
+    color: var(--muted);
+    font-family: var(--inter);
+    font-size: var(--sub-size);
+  }
+
+  .label {
+    color: var(--label-color);
+    display: block;
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    margin-bottom: 0.375rem;
+  }
+  .input {
+    background: #fff;
+    border: 1px solid var(--input-border);
+    border-radius: var(--field-radius);
+    box-shadow: inset 0 1px 1px rgb(11 24 54 / 3%);
+    color: #1e293b;
+    font-size: var(--field-size);
+    height: var(--field-h);
+    outline: none;
+    padding-inline: 1rem;
+    width: 100%;
+  }
+  textarea.input {
+    height: auto;
+    padding-block: 0.75rem;
+  }
+  .input::placeholder {
+    color: #737783;
+  }
+  .input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+  .input:disabled,
+  .input:read-only:not(select) {
+    background: var(--page);
+  }
+  .input-error {
+    border-color: var(--danger);
+    background: #fff5f5;
+  }
+  .error-text {
+    color: var(--danger);
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+  }
+
+  .btn {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 0.8125rem;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--btn-size);
+    font-weight: 700;
+    gap: 0.5rem;
+    justify-content: center;
+    min-height: var(--btn-h);
+    padding-inline: 1.25rem;
+    transition: background-color 0.15s;
+  }
+  .btn:focus-visible {
+    outline: 3px solid var(--primary-soft);
+    outline-offset: 1px;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 4px 6px rgb(23 85 179 / 19%);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(0.92);
+  }
+  .btn-secondary {
+    background: #fff;
+    border-color: var(--input-border);
+    color: var(--ink);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--page);
+  }
+  .btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+  .btn-danger:hover:not(:disabled) {
+    filter: brightness(0.92);
+  }
+  .link-action {
+    color: var(--primary);
+    cursor: pointer;
+    font-size: var(--btn-size);
+    font-weight: 700;
+  }
+  .link-action:hover {
+    text-decoration: underline;
+  }
+  .link-danger {
+    color: var(--danger);
+    cursor: pointer;
+    font-size: var(--btn-size);
+    font-weight: 700;
+  }
+  .link-disabled {
+    color: #94a3b8;
+    font-size: var(--btn-size);
+    font-weight: 700;
+  }
+
+  .alert {
+    border-radius: 0.75rem;
+    border-style: solid;
+    border-width: 1px;
+    font-size: 0.9375rem;
+    padding: 0.875rem 1rem;
+  }
+  .alert-error {
+    background: var(--danger-soft);
+    border-color: #fecaca;
+    color: var(--danger);
+  }
+  .alert-success {
+    background: var(--success-soft);
+    border-color: #bfe6d0;
+    color: var(--success);
+  }
+  .alert-warn {
+    background: var(--warn-soft);
+    border-color: #fde68a;
+    color: var(--warn);
+  }
+  .alert-info {
+    background: var(--primary-soft);
+    border-color: #c9dcf8;
+    color: var(--primary);
+  }
+
+  .badge {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1rem;
+    padding: 0.25rem 0.625rem;
+    white-space: nowrap;
+  }
+  .badge-green {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .badge-blue {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .badge-amber {
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+  .badge-rose {
+    background: #ffe4e6;
+    color: #334155;
+  }
+  .badge-grey {
+    background: #e7ecf3;
+    color: #334155;
+  }
+
+  .table-wrap {
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    overflow-x: auto;
+  }
+  .data-table {
+    border-collapse: collapse;
+    text-align: left;
+    width: 100%;
+  }
+  .data-table th {
+    background: var(--table-head);
+    color: var(--muted);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    height: 3rem;
+    letter-spacing: 0.05em;
+    padding-inline: 1rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .data-table td {
+    border-bottom: 1px solid var(--divider);
+    color: #1e293b;
+    font-size: 0.875rem;
+    height: 4rem;
+    padding: 0.5rem 1rem;
+  }
+  .data-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .data-table td.strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
 }

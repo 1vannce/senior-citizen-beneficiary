@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no enums: role, status and method values are plain strings
+// validated in src/lib/constants.ts.
+
+model User {
+  id             String   @id @default(cuid())
+  username       String   @unique
+  passwordHash   String
+  fullName       String
+  role           String // STAFF | ADMIN
+  isActive       Boolean  @default(true)
+  failedAttempts Int      @default(0)
+  lockedAt       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  createdBeneficiaries Beneficiary[]    @relation("BeneficiaryCreatedBy")
+  capturedFaces        FaceData[]
+  releasedClaims       AssistanceClaim[]
+  auditLogs            AuditLog[]
+}
+
+model Beneficiary {
+  id                      String   @id @default(cuid())
+  referenceNo             String   @unique
+  firstName               String
+  middleName              String?
+  lastName                String
+  birthDate               DateTime
+  sex                     String
+  address                 String
+  barangay                String
+  contactNo               String?
+  oscaIdNo                String   @unique
+  status                  String   @default("ACTIVE") // ACTIVE | DEACTIVATED
+  needsManualVerification Boolean  @default(false)
+  createdById             String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  createdBy User              @relation("BeneficiaryCreatedBy", fields: [createdById], references: [id])
+  faceData  FaceData?
+  claims    AssistanceClaim[]
+}
+
+model FaceData {
+  id             String   @id @default(cuid())
+  beneficiaryId  String   @unique
+  embedding      String // JSON array of numbers
+  consentGivenAt DateTime
+  capturedById   String
+  createdAt      DateTime @default(now())
+
+  beneficiary Beneficiary @relation(fields: [beneficiaryId], references: [id])
+  capturedBy  User        @relation(fields: [capturedById], references: [id])
+}
+
+model Program {
+  id                   String  @id @default(cuid())
+  name                 String  @unique
+  description          String?
+  restrictedPeriodDays Int     @default(90)
+  isActive             Boolean @default(true)
+
+  claims AssistanceClaim[]
+}
+
+model AssistanceClaim {
+  id                 String   @id @default(cuid())
+  beneficiaryId      String
+  programId          String
+  amountOrItems      String
+  verificationMethod String // FACE | MANUAL_ID | REPRESENTATIVE
+  representativeName String?
+  releasedById       String
+  releasedAt         DateTime @default(now())
+  remarks            String?
+
+  beneficiary Beneficiary @relation(fields: [beneficiaryId], references: [id])
+  program     Program     @relation(fields: [programId], references: [id])
+  releasedBy  User        @relation(fields: [releasedById], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
