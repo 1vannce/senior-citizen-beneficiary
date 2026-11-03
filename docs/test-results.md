@@ -78,3 +78,25 @@ Notes:
 - Decision: the extra registration fields are now saved (migration `save_registration_details`, new empty columns only). The registration API checks them with the same rules as the form, including a valid email address and real ID dates. See `README.md`.
 - Consent notice: it already stated the purpose, who can access the data and that no photo is kept. It now also says consent is voluntary, that declining still gets the senior registered and served through manual ID, and names the RA 10173 rights to see, correct or withdraw.
 - Gap: there is no action in the app to remove a senior's face data when they withdraw consent. Editing the new fields from Manage Records is also not built yet (Module 9).
+
+## 6. Capture Facial Data (2.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T09 no face in view shows "No face found. Please reposition and face the camera." | Auto (fake camera, real face models) + Hand (screenshot) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T09 with a real person stepping out of view | Hand (webcam) | Not run yet | | |
+| T10 a printed photo or a phone screen fails liveness | Hand (webcam) | Not run yet | | |
+| T11 3 failed tries, then manual verification, flags the record and saves no face data | Auto (fake camera) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| T12 (logic) a second capture of a registered face, under a new OSCA ID, is blocked and the existing record is returned; a different face is not blocked | Auto (API, made-up face vectors) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T12 the same person registering twice in front of the webcam | Hand (webcam) | Not run yet | | |
+| No photo is saved: database | Auto (scan of the test database after the full suite) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| No photo is saved: project folder | Hand (file search after the full suite) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| No photo is saved: request sent to the server | Code review + Auto (T11, no-consent request) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Register all five group members | Hand (webcam) | Not run yet | | |
+
+Notes:
+- Bug fixed: the Capture button was enabled as soon as the camera started, before the first frame had been checked. A click in that moment was rejected with "Starting camera..." and used up one of the 3 tries. `FaceCamera` now enables the button, and shows "Camera ready", only after the first frame has been checked. The T11 test failed before the fix and passes after it.
+- The fake camera shows a test pattern with no face, so T09 and T11 run on screen with the real face models. A face cannot be captured this way, so T12 was checked through the registration API with made-up face vectors, and the "already registered" message on screen was not reached.
+- No photo, database: no table has a binary column, no stored text contains image data, and every `FaceData.embedding` is a list of numbers. Project folder: the only image files are the two UI images in `public/images/`. Request: `FaceCamera` only passes `face.embedding`, which the face library returns as a plain list of 1024 numbers (`Array.from` in its `faceres` code); no code turns a video frame into an image. The request with a real captured face was not inspected; check it in the browser's Network tab when registering the group members.
+- In T11 the use case's "Cancel" is the "No, continue with manual verification" choice. After 3 failed tries the camera closes and only manual verification can continue.
+- Tests ran against a separate database; the real `dev.db` was not touched (still 3 users, 4 programs, 0 seniors).
