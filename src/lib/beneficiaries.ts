@@ -21,18 +21,19 @@ export function summary(b: Beneficiary) {
 }
 
 // Every word must appear in some field, so "Maria Reyes" finds "Maria Santos Reyes".
-// SQLite `contains` ignores letter case for A-Z.
+// SQLite `contains` ignores letter case for A-Z only, so a word with Ñ or another letter
+// outside A-Z is also tried in lower and upper case: "peña" then finds "PEÑA" and "Peña".
 export function searchWhere(q: string): Prisma.BeneficiaryWhereInput {
   const words = q.trim().split(/\s+/).filter(Boolean);
   return {
     AND: words.map((w) => ({
-      OR: [
-        { firstName: { contains: w } },
-        { middleName: { contains: w } },
-        { lastName: { contains: w } },
-        { referenceNo: { contains: w } },
-        { oscaIdNo: { contains: w } },
-      ],
+      OR: (/[^\x00-\x7F]/.test(w) ? [w.toLowerCase(), w.toUpperCase()] : [w]).flatMap((v) => [
+        { firstName: { contains: v } },
+        { middleName: { contains: v } },
+        { lastName: { contains: v } },
+        { referenceNo: { contains: v } },
+        { oscaIdNo: { contains: v } },
+      ]),
     })),
   };
 }

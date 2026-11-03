@@ -22,6 +22,9 @@ describe("searchWhere", () => {
   it("ignores extra spaces", () => {
     expect(searchWhere("  Maria   Reyes ")).toEqual({ AND: [fields("Maria"), fields("Reyes")] });
   });
+  it("also tries lower and upper case for a word with Ñ, which SQLite does not fold", () => {
+    expect(searchWhere("Peña")).toEqual({ AND: [{ OR: [...fields("peña").OR, ...fields("PEÑA").OR] }] });
+  });
 });
 
 describe("isOngoingTransaction (T23)", () => {
