@@ -62,3 +62,19 @@ Notes:
 - The automated face checks use made-up number vectors instead of a camera, so they test the matching and the screens around it, not the face reading itself. T13 and T14 still need a person in front of the webcam.
 - The ambiguous screen (the warning and the two records) is only reached through the camera, so it was checked through the API, not on screen.
 - Tests ran against a separate database (`DATABASE_URL` pointing to a scratch file); the real `dev.db` was not touched.
+
+## 5. Register Senior Citizen (1.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T05 a missing required field is highlighted and the step does not advance | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T06 a birth date that makes the applicant 59 is blocked | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T07 declining consent saves the record without face data and flags it for manual verification | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T08 the same OSCA ID twice is blocked and the existing record is shown | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Every registration field is saved and shown on the record page | Auto (T07) + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Consent notice checked against RA 10173 principles | Review + Hand | Updated | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Decision: the extra registration fields are now saved (migration `save_registration_details`, new empty columns only). The registration API checks them with the same rules as the form, including a valid email address and real ID dates. See `README.md`.
+- Consent notice: it already stated the purpose, who can access the data and that no photo is kept. It now also says consent is voluntary, that declining still gets the senior registered and served through manual ID, and names the RA 10173 rights to see, correct or withdraw.
+- Gap: there is no action in the app to remove a senior's face data when they withdraw consent. Editing the new fields from Manage Records is also not built yet (Module 9).
