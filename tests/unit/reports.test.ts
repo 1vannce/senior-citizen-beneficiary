@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { releasedBetween } from "@/lib/reports";
+import Papa from "papaparse";
+import { releasedBetween, toCsv } from "@/lib/reports";
 
 describe("releasedBetween", () => {
   it("covers whole days in Manila time", () => {
@@ -15,5 +16,32 @@ describe("releasedBetween", () => {
   it("leaves out a side that was not picked", () => {
     expect(releasedBetween("", null)).toEqual({});
     expect(Object.keys(releasedBetween(null, "2026-11-03"))).toEqual(["lt"]);
+  });
+});
+
+describe("toCsv", () => {
+  const cols = [
+    ["name", "Name"],
+    ["barangay", "Barangay"],
+  ] as const;
+
+  it("starts with a byte order mark so Excel reads ñ correctly", () => {
+    const csv = toCsv([{ name: "Peña, Niño", barangay: "Santo Niño" }], cols);
+    expect(csv.charCodeAt(0)).toBe(0xfeff);
+    expect(csv).toContain("Peña, Niño");
+  });
+  it("keeps names with commas and quotes in one cell, with the headers shown on screen", () => {
+    const rows = [{ name: 'Cruz, Jose "Pepe"', barangay: "Poblacion" }];
+    const parsed = Papa.parse<string[]>(toCsv(rows, cols).slice(1)).data;
+    expect(parsed).toEqual([
+      ["Name", "Barangay"],
+      ['Cruz, Jose "Pepe"', "Poblacion"],
+    ]);
+  });
+  it("stops a value from running as an Excel formula", () => {
+    expect(toCsv([{ name: "=HYPERLINK(1)", barangay: "x" }], cols)).not.toMatch(/\n=HYPERLINK/);
+  });
+  it("writes only the header row when there are no rows", () => {
+    expect(toCsv([], cols).trimEnd()).toBe("﻿Name,Barangay");
   });
 });

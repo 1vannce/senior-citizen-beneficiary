@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Papa from "papaparse";
 import { ChartColumn } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/DataTable";
 import { Field } from "@/components/ui";
 import { BARANGAYS } from "@/lib/constants";
+import { toCsv } from "@/lib/reports";
 
 type Program = { id: string; name: string };
 type Row = Record<string, string>;
@@ -94,9 +94,8 @@ export default function ReportsClient({ programs }: { programs: Program[] }) {
 
   function exportCsv() {
     if (!rows) return;
-    // Same rows and column order as the table on screen
-    const data = rows.map((r) => Object.fromEntries(cols.map(([k, h]) => [h, r[k]])));
-    const blob = new Blob([Papa.unparse(data)], { type: "text/csv;charset=utf-8" });
+    // Same rows, columns and headers as the table on screen
+    const blob = new Blob([toCsv(rows, cols)], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `scbvs-${shownKind}-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -228,7 +227,7 @@ export default function ReportsClient({ programs }: { programs: Program[] }) {
               ))}
             </div>
 
-            {isClaims ? (
+            {isClaims && (
               <div className="table-wrap">
                 <table className="data-table">
                   <thead>
@@ -251,9 +250,9 @@ export default function ReportsClient({ programs }: { programs: Program[] }) {
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <DataTable key={shownKind} data={rows} columns={columns} noun="records" />
             )}
+            {isClaims && <h3 className="font-bold text-ink">Claims released</h3>}
+            <DataTable key={shownKind} data={rows} columns={columns} noun={isClaims ? "claims" : "records"} />
             <p className="text-xs text-muted">Contact numbers and addresses are not included in reports.</p>
           </div>
         )}
