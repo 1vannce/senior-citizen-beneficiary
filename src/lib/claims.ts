@@ -1,15 +1,18 @@
 import { db } from "./db";
 import { checkEligibility } from "./eligibility";
 
-export async function evaluateEligibility(beneficiaryId: string, programId: string) {
+type Tx = Pick<typeof db, "beneficiary" | "program" | "assistanceClaim">;
+
+// Pass the transaction client when the check must hold until a claim is saved.
+export async function evaluateEligibility(beneficiaryId: string, programId: string, client: Tx = db) {
   const [beneficiary, program] = await Promise.all([
-    db.beneficiary.findUnique({ where: { id: beneficiaryId } }),
-    db.program.findUnique({ where: { id: programId } }),
+    client.beneficiary.findUnique({ where: { id: beneficiaryId } }),
+    client.program.findUnique({ where: { id: programId } }),
   ]);
   if (!beneficiary) return null;
 
   const last = program
-    ? await db.assistanceClaim.findFirst({
+    ? await client.assistanceClaim.findFirst({
         where: { beneficiaryId, programId },
         orderBy: { releasedAt: "desc" },
         select: { releasedAt: true },

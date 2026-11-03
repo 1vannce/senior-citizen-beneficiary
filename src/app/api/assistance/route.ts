@@ -47,14 +47,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Representative name is required." }, { status: 400 });
   }
 
-  // 2. Eligibility
-  const out = await evaluateEligibility(d.beneficiaryId, d.programId);
-  if (!out) return NextResponse.json({ error: "Beneficiary not found." }, { status: 404 });
-  if (!out.result.eligible) {
-    return NextResponse.json({ error: out.result.message, code: out.result.code }, { status: 409 });
-  }
-
-  const claim = await db.$transaction(async (tx) => {
+  // 2. Eligibility, checked in the same transaction as the save so two requests at once cannot both pass
+  const saved = await db.$transaction(async (tx) => {
+    const out = await evaluateEligibility(d.beneficiaryId, d.programId, tx);
+    if (!out) return { error: NextResponse.json({ error: "Beneficiary not found." }, { status: 404 }) };
+    if (!out.result.eligible) {
+      return { error: NextResponse.json({ error: out.result.message, code: out.result.code }, { status: 409 }) };
+    }
     const c = await tx.assistanceClaim.create({
       data: {
         beneficiaryId: d.beneficiaryId,
@@ -67,8 +66,9 @@ export async function POST(req: Request) {
       },
     });
     await writeAudit(user.id, "RELEASE_ASSISTANCE", "AssistanceClaim", c.id, `${out.program?.name}: ${d.amountOrItems} (${d.verificationMethod})`, tx);
-    return c;
+    return { claim: c };
   });
+  if ("error" in saved) return saved.error;
 
-  return NextResponse.json({ claimId: claim.id, releasedAt: claim.releasedAt }, { status: 201 });
+  return NextResponse.json({ claimId: saved.claim.id, releasedAt: saved.claim.releasedAt }, { status: 201 });
 }
