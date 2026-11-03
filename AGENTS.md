@@ -15,7 +15,7 @@ npm run dev          # http://localhost:3000
 npm run build
 npm run lint
 npm test             # Vitest unit tests (tests/unit)
-npm run e2e          # Playwright (tests/e2e); run `npm run db:seed:test` first and before each re-run
+npm run e2e          # Playwright (tests/e2e); run `npm run db:seed:test` first and before each re-run, against a separate DATABASE_URL (README, Test data)
 npm run db:seed      # adds the starting accounts and programs; keeps existing records
 npm run db:seed:test # ERASES the DB and loads made-up test data (tests only)
 npm run db:reset     # drop, migrate, seed

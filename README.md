@@ -36,12 +36,23 @@ It also adds the programs Pension (90-day restricted period), Medical (90), Groc
 
 `npm run db:seed:test` **erases the database** and loads made-up data for the automated tests. Use it only on a development copy, never on the real records. It sets the passwords `Admin@123` (admin) and `Staff@123` (staff1, staff2), makes Burial inactive (T18) and adds 10 made-up beneficiaries. "Maria Santos Reyes" already has a recent Pension claim, so she is ineligible for Pension (T16). Test beneficiaries have no face data.
 
+To keep the real records, run the automated tests against a separate database file. Stop the normal server first, then in Git Bash:
+
+```bash
+export DATABASE_URL="file:./e2e.db"   # prisma/e2e.db, ignored by git
+npx prisma migrate deploy
+npm run db:seed:test
+npm run build && npx next start      # in this terminal; run `npm run e2e` in another
+```
+
+Settings already in your shell win over `.env`, so this server and seed use `e2e.db` and leave `dev.db` alone. Close the terminal afterwards so the normal server uses `dev.db` again.
+
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `npm test` | Vitest unit tests: eligibility, face matching, validators, beneficiary search |
-| `npm run e2e` | Playwright: T01 to T04, idle sign-out, assistance journey, T16, T21, T22. Run `npm run db:seed:test` first and again before re-running |
+| `npm run e2e` | Playwright: T01 to T04, idle sign-out, user accounts (T25, T26), verify (face match logic, flagged record, T15), assistance journey, T16, T21, T22. Run `npm run db:seed:test` first and again before re-running, on a separate database (see Test data) |
 | `npm run db:seed` | Add the starting accounts and programs; existing records are kept |
 | `npm run db:seed:test` | **Erase** the database and load the test data |
 | `npm run db:reset` | **Erase** the database, migrate and seed the starting accounts |
