@@ -144,7 +144,7 @@ export default function AppShell({ role, fullName, today, children }: Props) {
               <p className="font-bold text-ink">OSCA Office / {title}</p>
             </div>
             <div className="flex items-center gap-4">
-              <p className="hidden text-sm text-muted md:block">{fullName}, OSCA Administrator</p>
+              <p className="hidden text-sm text-muted md:block">{fullName}</p>
               <span className="badge bg-primary-soft text-[#334155]">System Administrator</span>
             </div>
           </header>
