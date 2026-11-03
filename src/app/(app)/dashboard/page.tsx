@@ -15,6 +15,7 @@ import type { User } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requirePageUser } from "@/lib/session";
 import { fullName } from "@/lib/beneficiaries";
+import { ACTION_LABELS } from "@/lib/constants";
 import { claimRef, dateTime, greeting, isoDate } from "@/lib/format";
 
 export default async function DashboardPage() {
@@ -121,16 +122,6 @@ function StaffAction({ href, icon: Icon, title, text }: { href: string; icon: Lu
     </Link>
   );
 }
-
-const ACTION_LABELS: Record<string, string> = {
-  REGISTER: "Registered beneficiary",
-  UPDATE: "Updated beneficiary",
-  DEACTIVATE: "Deactivated beneficiary",
-  REACTIVATE: "Reactivated beneficiary",
-  RELEASE_ASSISTANCE: "Released assistance",
-  CREATE_USER: "Created account",
-  UPDATE_USER: "Updated account",
-};
 
 async function AdminDashboard({ user }: { user: User }) {
   const [active, inactive, admins, staff, claims, auditCount, recent] = await Promise.all([

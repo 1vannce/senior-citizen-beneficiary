@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePageUser } from "@/lib/session";
-import { fullName } from "@/lib/beneficiaries";
+import { editValues, fullName } from "@/lib/beneficiaries";
+import { ACTION_LABELS } from "@/lib/constants";
 import { dateTime, isoDate, longDate } from "@/lib/format";
 import RecordEditor from "./RecordEditor";
 
@@ -42,21 +43,11 @@ export default async function RecordPage({ params, searchParams }: Props) {
         id: a.id,
         date: dateTime(a.createdAt),
         user: a.user.fullName,
-        action: a.action,
+        action: ACTION_LABELS[a.action] ?? a.action,
         reason: a.reason ?? "",
       }))}
       action={action}
-      initial={{
-        firstName: b.firstName,
-        middleName: b.middleName ?? "",
-        lastName: b.lastName,
-        birthDate: b.birthDate.toISOString().slice(0, 10),
-        sex: b.sex as "M" | "F",
-        address: b.address,
-        barangay: b.barangay,
-        contactNo: b.contactNo ?? "",
-        oscaIdNo: b.oscaIdNo,
-      }}
+      initial={editValues(b)}
     />
   );
 }

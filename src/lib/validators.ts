@@ -57,8 +57,9 @@ export const registerSchema = beneficiarySchema.extend({
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-// An edited record must still belong to a senior citizen, so the age rule applies here too.
-export const beneficiaryEditSchema = beneficiarySchema.extend({
+// An edited record must still belong to a senior citizen, so the registration rules apply here too.
+// City and province were saved inside the address, so the address is edited as one field.
+export const beneficiaryEditSchema = registerSchema.omit({ city: true, province: true }).extend({
   reason: required("Reason for change"),
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, beneficiarySchema, registerSchema, userCreateSchema, userEditSchema } from "@/lib/validators";
+import { ageOn, beneficiaryEditSchema, beneficiarySchema, registerSchema, userCreateSchema, userEditSchema } from "@/lib/validators";
 
 const valid = {
   firstName: "Maria",
@@ -61,6 +61,20 @@ describe("registerSchema", () => {
   });
   it("rejects a missing emergency contact", () => {
     expect(registerSchema.safeParse({ ...full, emergencyName: "" }).success).toBe(false);
+  });
+
+  describe("beneficiaryEditSchema", () => {
+    const edit = { ...full, city: undefined, province: undefined };
+    it("accepts an edit with every registration field and a reason, without city and province", () => {
+      expect(beneficiaryEditSchema.safeParse({ ...edit, reason: "Corrected email" }).success).toBe(true);
+    });
+    it("needs a reason and keeps the registration rules", () => {
+      const r = beneficiaryEditSchema.safeParse({ ...edit, reason: " ", email: "ana@", birthplace: "" });
+      expect(r.success).toBe(false);
+      if (!r.success) {
+        expect(Object.keys(r.error.flatten().fieldErrors)).toEqual(expect.arrayContaining(["reason", "email", "birthplace"]));
+      }
+    });
   });
 });
 

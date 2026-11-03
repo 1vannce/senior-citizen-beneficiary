@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, CircleCheck, Fingerprint, Lightbulb, ShieldCheck, UserCheck, EyeOff, Info } from "lucide-react";
 import { registerSchema, type RegisterInput } from "@/lib/validators";
-import { BARANGAYS } from "@/lib/constants";
+import { BARANGAYS, CIVIL_STATUSES, ID_TYPES } from "@/lib/constants";
 import type { BeneficiarySummary } from "@/lib/types";
 import FaceCamera from "@/components/face/FaceCamera";
 import { CompletePanel, Field, PageHeader, PersonCard, Stepper } from "@/components/ui";
@@ -169,7 +169,7 @@ export default function RegisterFlow() {
                 <option value="" disabled>
                   Select Civil Status
                 </option>
-                {["Single", "Married", "Widowed", "Separated"].map((s) => (
+                {CIVIL_STATUSES.map((s) => (
                   <option key={s}>{s}</option>
                 ))}
               </select>
@@ -214,8 +214,9 @@ export default function RegisterFlow() {
                 <option value="" disabled>
                   Select ID Type
                 </option>
-                <option>OSCA ID</option>
-                <option>Senior Citizen ID</option>
+                {ID_TYPES.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
               </select>
             </Field>
             <Text label="ID number *" placeholder="Enter ID Number" error={errors.oscaIdNo?.message} {...register("oscaIdNo")} />

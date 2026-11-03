@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { requireApiUser } from "@/lib/session";
 import { writeAudit } from "@/lib/audit";
 import { beneficiaryEditSchema } from "@/lib/validators";
-import { summary } from "@/lib/beneficiaries";
+import { changedFields, editValues, summary } from "@/lib/beneficiaries";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -25,6 +25,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
     );
   }
   const { reason, ...data } = parsed.data;
+  const changes = changedFields(editValues(existing), data);
+  if (changes.length === 0) return NextResponse.json({ error: "No changes to save." }, { status: 400 });
 
   if (data.oscaIdNo !== existing.oscaIdNo) {
     const dup = await db.beneficiary.findUnique({ where: { oscaIdNo: data.oscaIdNo } });
@@ -49,9 +51,20 @@ export async function PATCH(req: Request, { params }: Ctx) {
         barangay: data.barangay,
         contactNo: data.contactNo || null,
         oscaIdNo: data.oscaIdNo,
+        suffix: data.suffix || null,
+        birthplace: data.birthplace,
+        civilStatus: data.civilStatus,
+        email: data.email || null,
+        emergencyName: data.emergencyName,
+        emergencyRelationship: data.emergencyRelationship,
+        emergencyMobile: data.emergencyMobile,
+        idType: data.idType,
+        idPlaceOfIssue: data.placeOfIssue,
+        idIssueDate: new Date(data.issueDate),
+        idExpiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
       },
     });
-    await writeAudit(auth.user.id, "UPDATE", "Beneficiary", id, reason, tx);
+    await writeAudit(auth.user.id, "UPDATE", "Beneficiary", id, `${reason} (changed: ${changes.join(", ")})`, tx);
     return b;
   });
   return NextResponse.json({ beneficiary: summary(updated) });

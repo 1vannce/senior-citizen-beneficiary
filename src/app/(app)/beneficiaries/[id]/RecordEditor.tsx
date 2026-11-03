@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { beneficiaryEditSchema } from "@/lib/validators";
-import { BARANGAYS } from "@/lib/constants";
+import { BARANGAYS, CIVIL_STATUSES, ID_TYPES } from "@/lib/constants";
 import { Field, Modal, PageHeader, StatusBadge } from "@/components/ui";
 import type { z } from "zod";
 
@@ -111,8 +111,14 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
             <Field label="Last name *" error={errors.lastName?.message}>
               <input className={f("lastName")} {...register("lastName")} />
             </Field>
+            <Field label="Suffix" error={errors.suffix?.message}>
+              <input className={f("suffix")} {...register("suffix")} />
+            </Field>
             <Field label="Birth date *" error={errors.birthDate?.message}>
               <input type="date" className={f("birthDate")} {...register("birthDate")} />
+            </Field>
+            <Field label="Birthplace *" error={errors.birthplace?.message}>
+              <input className={f("birthplace")} {...register("birthplace")} />
             </Field>
             <Field label="Sex *" error={errors.sex?.message}>
               <select className={f("sex")} {...register("sex")}>
@@ -120,8 +126,21 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
                 <option value="M">Male</option>
               </select>
             </Field>
-            <Field label="OSCA ID number *" error={errors.oscaIdNo?.message}>
-              <input className={f("oscaIdNo")} {...register("oscaIdNo")} />
+            <Field label="Civil status *" error={errors.civilStatus?.message}>
+              <select className={f("civilStatus")} {...register("civilStatus")}>
+                <option value="" disabled>
+                  Select Civil Status
+                </option>
+                {CIVIL_STATUSES.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Contact number *" error={errors.contactNo?.message}>
+              <input className={f("contactNo")} {...register("contactNo")} />
+            </Field>
+            <Field label="Email address" error={errors.email?.message}>
+              <input className={f("email")} {...register("email")} />
             </Field>
             <Field label="Barangay *" error={errors.barangay?.message}>
               <select className={f("barangay")} {...register("barangay")}>
@@ -130,11 +149,39 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
                 ))}
               </select>
             </Field>
-            <Field label="Contact number" error={errors.contactNo?.message}>
-              <input className={f("contactNo")} {...register("contactNo")} />
-            </Field>
             <Field label="Address *" error={errors.address?.message} className="md:col-span-3">
               <input className={f("address")} {...register("address")} />
+            </Field>
+            <Field label="Emergency contact name *" error={errors.emergencyName?.message}>
+              <input className={f("emergencyName")} {...register("emergencyName")} />
+            </Field>
+            <Field label="Relationship *" error={errors.emergencyRelationship?.message}>
+              <input className={f("emergencyRelationship")} {...register("emergencyRelationship")} />
+            </Field>
+            <Field label="Emergency contact number *" error={errors.emergencyMobile?.message}>
+              <input className={f("emergencyMobile")} {...register("emergencyMobile")} />
+            </Field>
+            <Field label="OSCA ID number *" error={errors.oscaIdNo?.message}>
+              <input className={f("oscaIdNo")} {...register("oscaIdNo")} />
+            </Field>
+            <Field label="ID type *" error={errors.idType?.message}>
+              <select className={f("idType")} {...register("idType")}>
+                <option value="" disabled>
+                  Select ID Type
+                </option>
+                {ID_TYPES.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="ID place of issue *" error={errors.placeOfIssue?.message}>
+              <input className={f("placeOfIssue")} {...register("placeOfIssue")} />
+            </Field>
+            <Field label="ID issue date *" error={errors.issueDate?.message}>
+              <input type="date" className={f("issueDate")} {...register("issueDate")} />
+            </Field>
+            <Field label="ID expiry date" error={errors.expiryDate?.message}>
+              <input type="date" className={f("expiryDate")} {...register("expiryDate")} />
             </Field>
             <Field label="Reason for change *" error={errors.reason?.message} className="md:col-span-3">
               <input className={f("reason")} {...register("reason")} />
@@ -237,7 +284,7 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
                     <tr>
                       <th>Date and time</th>
                       <th>Changed by</th>
-                      <th>Field</th>
+                      <th>Action</th>
                       <th>Reason</th>
                     </tr>
                   </thead>

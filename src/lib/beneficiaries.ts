@@ -72,3 +72,63 @@ export async function hasOngoingTransaction(beneficiaryId: string) {
   });
   return isOngoingTransaction(last?.releasedAt ?? null);
 }
+
+// Date-only fields are saved as midnight UTC, so the ISO date is the date that was entered.
+const dateOnly = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : "");
+
+// A record in the shape of the edit form (empty text for missing values).
+export function editValues(b: Beneficiary) {
+  return {
+    firstName: b.firstName,
+    middleName: b.middleName ?? "",
+    lastName: b.lastName,
+    suffix: b.suffix ?? "",
+    birthDate: dateOnly(b.birthDate),
+    birthplace: b.birthplace ?? "",
+    sex: b.sex as "M" | "F",
+    civilStatus: b.civilStatus ?? "",
+    contactNo: b.contactNo ?? "",
+    email: b.email ?? "",
+    address: b.address,
+    barangay: b.barangay,
+    emergencyName: b.emergencyName ?? "",
+    emergencyRelationship: b.emergencyRelationship ?? "",
+    emergencyMobile: b.emergencyMobile ?? "",
+    oscaIdNo: b.oscaIdNo,
+    idType: b.idType ?? "",
+    placeOfIssue: b.idPlaceOfIssue ?? "",
+    issueDate: dateOnly(b.idIssueDate),
+    expiryDate: dateOnly(b.idExpiryDate),
+  };
+}
+export type EditValues = ReturnType<typeof editValues>;
+
+const FIELD_LABELS: Record<keyof EditValues, string> = {
+  firstName: "First name",
+  middleName: "Middle name",
+  lastName: "Last name",
+  suffix: "Suffix",
+  birthDate: "Birth date",
+  birthplace: "Birthplace",
+  sex: "Sex",
+  civilStatus: "Civil status",
+  contactNo: "Contact number",
+  email: "Email address",
+  address: "Address",
+  barangay: "Barangay",
+  emergencyName: "Emergency contact name",
+  emergencyRelationship: "Emergency contact relationship",
+  emergencyMobile: "Emergency contact number",
+  oscaIdNo: "OSCA ID number",
+  idType: "ID type",
+  placeOfIssue: "ID place of issue",
+  issueDate: "ID issue date",
+  expiryDate: "ID expiry date",
+};
+
+// Labels of the fields an edit changes, for the change log. Spaces around a value do not count.
+export function changedFields(before: EditValues, after: Partial<Record<keyof EditValues, string>>): string[] {
+  return (Object.keys(FIELD_LABELS) as (keyof EditValues)[])
+    .filter((k) => (before[k] ?? "").trim() !== (after[k] ?? "").trim())
+    .map((k) => FIELD_LABELS[k]);
+}
