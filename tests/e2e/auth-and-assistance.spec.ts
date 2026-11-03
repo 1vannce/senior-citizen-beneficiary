@@ -44,6 +44,18 @@ test("T02 five wrong passwords lock the account", async ({ page }) => {
   await page.context().clearCookies();
   for (let i = 0; i < 5; i++) await login(page, name, "bad-password");
   await expect(alert(page)).toContainText("locked");
+
+  // Admin unlocks the account, then the user can sign in again
+  await loginOk(page, "admin", "Admin@123");
+  await page.goto("/admin/users");
+  const row = page.getByRole("row", { name: new RegExp(name) });
+  await expect(row).toContainText("Locked");
+  await row.getByRole("button", { name: "Unlock" }).click();
+  await expect(page.getByText("Account updated.")).toBeVisible();
+  await expect(row).toContainText("Active");
+
+  await page.context().clearCookies();
+  await loginOk(page, name, "Passw0rd!");
 });
 
 test("T03 deactivated account is denied", async ({ page }) => {
@@ -63,6 +75,25 @@ test("T04 staff does not see admin menus", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "Register" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Reports" })).toHaveCount(0);
   await expect(nav.getByRole("link", { name: "Users" })).toHaveCount(0);
+  await expect(nav.getByRole("link", { name: "Beneficiary Records" })).toHaveCount(0);
+
+  // Typing an admin address sends Staff back to the dashboard
+  for (const path of ["/admin/users", "/beneficiaries", "/reports"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/dashboard/);
+  }
+});
+
+test("idle session signs out after 15 minutes", async ({ page }) => {
+  // Fake browser clock, so the real 15-minute limit is tested without waiting
+  await page.clock.install();
+  await loginOk(page, "staff1", "Staff@123");
+
+  await page.clock.fastForward("14:00");
+  await expect(page).toHaveURL(/dashboard/);
+
+  await page.clock.fastForward("01:30");
+  await expect(page).toHaveURL(/login/);
 });
 
 async function verifyByManualId(page: Page, search: string) {
