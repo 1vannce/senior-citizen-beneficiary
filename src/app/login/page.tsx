@@ -89,12 +89,11 @@ export default function LoginPage() {
         <p className="mt-8 text-base text-[#93a8d0] 2xl:mt-16">Senior Citizen Benefits &amp; Verification System</p>
       </section>
 
-      <section className="relative flex items-center justify-center overflow-hidden p-6">
-        <Image src="/images/login-seniors.png" alt="" fill sizes="50vw" priority className="object-cover object-bottom opacity-75" />
+      <section className="flex items-center justify-center bg-[#e8eef8] p-6">
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="relative w-full max-w-[46.25rem] space-y-5 rounded-[3.75rem] bg-[#d9d9d9e3] px-10 py-14 sm:px-20"
+          className="w-full max-w-[40rem] space-y-5 rounded-[2.5rem] border border-[#d5deec] bg-white px-8 py-12 shadow-sm sm:px-14"
         >
           <div>
             <p className="font-inter font-semibold text-[#1755b3]">WELCOME BACK</p>
@@ -116,7 +115,7 @@ export default function LoginPage() {
               id="username"
               autoComplete="username"
               placeholder="Enter Username"
-              className={`input border-white tracking-[1px] ${errors.username ? "input-error" : ""}`}
+              className={`input tracking-[1px] ${errors.username ? "input-error" : ""}`}
               {...register("username")}
             />
             {errors.username && <p className="error-text">{errors.username.message}</p>}
@@ -131,7 +130,7 @@ export default function LoginPage() {
               type="password"
               autoComplete="current-password"
               placeholder="Enter Password"
-              className={`input border-white tracking-[1px] ${errors.password ? "input-error" : ""}`}
+              className={`input tracking-[1px] ${errors.password ? "input-error" : ""}`}
               {...register("password")}
             />
             {errors.password && <p className="error-text">{errors.password.message}</p>}
@@ -149,7 +148,7 @@ export default function LoginPage() {
                   aria-pressed={role === r}
                   onClick={() => setRole(r)}
                   className={`h-14 rounded-[0.8125rem] border bg-white font-inter font-semibold text-[#44516a] ${
-                    role === r ? "border-[#1755b3] text-[#1755b3] ring-2 ring-[#1755b3]/20" : "border-white"
+                    role === r ? "border-[#1755b3] text-[#1755b3] ring-2 ring-[#1755b3]/20" : "border-[#cbd5e1]"
                   }`}
                 >
                   {r === "STAFF" ? "Staff" : "Administrator"}
