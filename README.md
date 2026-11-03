@@ -1,6 +1,8 @@
-# SCBVS Prototype
+# SCBVS
 
-Senior Citizen Beneficiary Verification System. Working prototype for PC-317 IHCI. **Fake test data only.**
+Senior Citizen Beneficiary Verification System, the PC-317 IHCI final project.
+
+**Privacy:** real senior citizen records are entered through the app and stay in the local database (`prisma/dev.db`, not committed). Never put real personal data in this repository; it is public.
 
 Next.js 15, TypeScript, Tailwind, Prisma + SQLite, next-auth (credentials), `@vladmandic/human` (in-browser face recognition).
 
@@ -10,32 +12,39 @@ Needs Node.js 20+, a webcam, and Chrome or Edge.
 
 ```bash
 npm install
-cp .env.example .env        # already present if you cloned this folder as-is
-npx prisma migrate dev      # creates prisma/dev.db
-npm run db:seed             # test users, programs, 10 fake beneficiaries (resets the data)
+cp .env.example .env        # then fill in NEXTAUTH_SECRET and the three SEED_*_PASSWORD values
+npx prisma migrate dev      # creates prisma/dev.db and runs the seed
+npm run db:seed             # starting accounts and programs; safe to run again
 npm run dev                 # http://localhost:3000
 ```
 
 Allow camera access when the browser asks. `localhost` works without HTTPS.
 
-## Test accounts
+## Accounts
 
-| Username | Password | Role |
+`npm run db:seed` creates these accounts with the starting passwords from `.env` (`SEED_ADMIN_PASSWORD`, `SEED_STAFF1_PASSWORD`, `SEED_STAFF2_PASSWORD`). Admin can change any password in Admin > Users.
+
+| Username | Name | Role |
 |---|---|---|
-| admin | Admin@123 | ADMIN |
-| staff1 | Staff@123 | STAFF |
-| staff2 | Staff@123 | STAFF |
+| admin | OSCA Administrator | ADMIN |
+| staff1 | OSCA Releasing Staff | STAFF |
+| staff2 | OSCA Registration Staff | STAFF |
 
-Seed data: programs Pension (90 days), Medical (90), Grocery (30) and Burial (inactive, for T18). Beneficiary "Maria Santos Reyes" already has a recent Pension claim, so she is ineligible for Pension (T16). Seeded beneficiaries have no face data; register new people (for example the group members) to test face matching.
+It also adds the programs Pension (90-day restricted period), Medical (90) and Grocery (30). It starts with no beneficiaries; register them in the app.
+
+## Test data
+
+`npm run db:seed:test` **erases the database** and loads made-up data for the automated tests. Use it only on a development copy, never on the real records. It sets the passwords `Admin@123` (admin) and `Staff@123` (staff1, staff2), adds the inactive Burial program (T18) and 10 made-up beneficiaries. "Maria Santos Reyes" already has a recent Pension claim, so she is ineligible for Pension (T16). Test beneficiaries have no face data.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `npm test` | Vitest unit tests: eligibility, face matching, validators |
-| `npm run e2e` | Playwright: T01 to T04, assistance journey, T16. Run `npm run db:seed` first and again before re-running |
-| `npm run db:seed` | Reset the database to the seed data |
-| `npm run db:reset` | Drop, migrate and seed from scratch |
+| `npm test` | Vitest unit tests: eligibility, face matching, validators, beneficiary search |
+| `npm run e2e` | Playwright: T01 to T04, idle sign-out, assistance journey, T16, T21, T22. Run `npm run db:seed:test` first and again before re-running |
+| `npm run db:seed` | Add the starting accounts and programs; existing records are kept |
+| `npm run db:seed:test` | **Erase** the database and load the test data |
+| `npm run db:reset` | **Erase** the database, migrate and seed the starting accounts |
 
 Face tests (T09 to T15) are manual with a webcam.
 
@@ -49,7 +58,7 @@ Run the E2E tests against a production build (`npm run build`, then `npx next st
 - Liveness uses Human's antispoof and liveness models (score of at least 0.5 each). Adjust `LIVENESS_MIN` in `src/components/face/FaceCamera.tsx` if real faces are rejected or photos pass.
 - Model files are served from `public/models` so the app works offline.
 
-## Notes and prototype decisions
+## Notes and design decisions
 
 - **Ongoing transaction (T23):** there is no in-progress claim state in the data model, so a claim released in the last 10 minutes counts as ongoing and blocks deactivation (`ONGOING_TRANSACTION_MINUTES` in `src/lib/beneficiaries.ts`).
 - **Session timeout:** 15 minutes idle. `IdleTimer` signs out and refreshes the session cookie while the user is active.

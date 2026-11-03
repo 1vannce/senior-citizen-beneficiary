@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Run "npm run db:seed" first so the fake test accounts exist.
+// Run "npm run db:seed:test" first so the test accounts and test beneficiaries exist.
 
 async function login(page: Page, username: string, password: string) {
   await page.goto("/login");

@@ -4,7 +4,7 @@ Guidance for AI coding agents working in this repo. Humans: see `README.md` for 
 
 ## Project
 
-Senior Citizen Beneficiary Verification System (SCBVS), a school prototype for PC-317 IHCI. It runs on one laptop with a webcam and uses **fake test data only**. It is not for real deployment. The full plan is in `../SCBVS-Prototype-Plan.md` (use cases, phases, the T01-T28 test checklist).
+Senior Citizen Beneficiary Verification System (SCBVS), the PC-317 IHCI final project. It runs on one laptop with a webcam and holds real senior citizen records, entered through the app. Real records live only in the local database; never put them in the repo, which is public. The full plan is in `../SCBVS-Prototype-Plan.md` (use cases, phases, the T01-T28 test checklist).
 
 Stack: Next.js 15 (App Router), TypeScript, Tailwind 4, Prisma 6 + SQLite, next-auth (credentials) + bcryptjs, `@vladmandic/human` (in-browser face recognition), react-hook-form + Zod, TanStack Table, papaparse. All code is TypeScript; do not add Python.
 
@@ -15,22 +15,23 @@ npm run dev          # http://localhost:3000
 npm run build
 npm run lint
 npm test             # Vitest unit tests (tests/unit)
-npm run e2e          # Playwright (tests/e2e); run `npm run db:seed` first and before each re-run
-npm run db:seed      # resets the DB to seed data
+npm run e2e          # Playwright (tests/e2e); run `npm run db:seed:test` first and before each re-run
+npm run db:seed      # adds the starting accounts and programs; keeps existing records
+npm run db:seed:test # ERASES the DB and loads made-up test data (tests only)
 npm run db:reset     # drop, migrate, seed
 npx prisma migrate dev --name <name>   # after editing prisma/schema.prisma
 ```
 
 Run E2E against a production build (`npm run build` then `npx next start`). Under `next dev`, on-demand compilation can fail random tests.
 
-Test accounts: `admin / Admin@123` (ADMIN), `staff1` and `staff2 / Staff@123` (STAFF).
+Accounts: `admin` (ADMIN), `staff1` and `staff2` (STAFF). `db:seed` reads their starting passwords from `.env`. `db:seed:test` sets the test passwords `Admin@123` and `Staff@123`.
 
 ## Layout
 
 - `src/app/(app)/` logged-in pages (route group, shared layout). `src/app/api/` route handlers. `src/app/login/` public.
 - `src/components/` shared UI. `face/FaceCamera.tsx` is the webcam + Human wrapper. `ui.tsx` holds shared primitives.
 - `src/lib/` business logic: `eligibility.ts`, `face.ts` (cosine similarity, threshold), `claims.ts`, `beneficiaries.ts`, `validators.ts` (Zod), `audit.ts`, `session.ts`, `auth.ts`, `db.ts`, `constants.ts`.
-- `prisma/` schema, migrations, `seed.ts`. `public/models/` Human model files (served offline).
+- `prisma/` schema, migrations, `seed.ts` (real start), `seed-test.ts` (test data). `public/models/` Human model files (served offline).
 - `tests/unit/` and `tests/e2e/`.
 
 ## Conventions
@@ -47,7 +48,8 @@ Test accounts: `admin / Admin@123` (ADMIN), `staff1` and `staff2 / Staff@123` (S
 ## Do not
 
 - Commit or print `.env` values. Edit `.env.example` for new variables.
-- Use real personal data anywhere, including seeds and tests.
+- Put real personal data in the repo, including seeds, tests, screenshots and docs. Seeds and tests use made-up data only.
+- Run `db:seed:test` or `db:reset` on the real database; both erase records.
 - Hand-edit `prisma/dev.db`, `.next/`, or generated files. Use migrations and the seed script.
 - Change the face threshold (`FACE_MATCH_THRESHOLD`) or liveness limits without saying why; they are tuned by testing.
 

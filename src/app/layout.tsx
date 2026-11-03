@@ -8,7 +8,7 @@ const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SCBVS - Senior Citizen Beneficiary Verification System",
-  description: "Prototype for PC-317 IHCI. Fake test data only.",
+  description: "Senior citizen beneficiary registration, verification and assistance records.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

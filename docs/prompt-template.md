@@ -19,7 +19,7 @@ Copy the block below, fill in the brackets, and delete lines that do not apply.
 [Files or folders, e.g. src/lib/eligibility.ts, src/app/api/assistance/route.ts.]
 
 ## Constraints
-- Fake data only; face embeddings only, no photos.
+- No real personal data in code, seeds or tests; face embeddings only, no photos.
 - Keep the change small; no new dependencies unless needed.
 - [Anything else: role (STAFF/ADMIN), audit log, UI size/contrast.]
 

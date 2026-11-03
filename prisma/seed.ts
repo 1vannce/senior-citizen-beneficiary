@@ -1,91 +1,40 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+// Starting accounts and programs for the real database. It only adds what is missing and never
+// deletes or overwrites records, so it is safe to run again. Beneficiaries are registered in the app.
+
 const db = new PrismaClient();
 
-const BARANGAYS = ["Poblacion", "San Isidro", "Santa Cruz", "Bagong Silang"];
+const ACCOUNTS = [
+  { username: "admin", fullName: "OSCA Administrator", role: "ADMIN", passwordEnv: "SEED_ADMIN_PASSWORD" },
+  { username: "staff1", fullName: "OSCA Releasing Staff", role: "STAFF", passwordEnv: "SEED_STAFF1_PASSWORD" },
+  { username: "staff2", fullName: "OSCA Registration Staff", role: "STAFF", passwordEnv: "SEED_STAFF2_PASSWORD" },
+];
 
-const NAMES: [string, string, string, string][] = [
-  ["Maria", "Santos", "Reyes", "F"],
-  ["Jose", "Dela Cruz", "Garcia", "M"],
-  ["Rosario", "Mendoza", "Lopez", "F"],
-  ["Pedro", "Aquino", "Ramos", "M"],
-  ["Teresita", "Bautista", "Cruz", "F"],
-  ["Antonio", "Villanueva", "Torres", "M"],
-  ["Luzviminda", "Castro", "Flores", "F"],
-  ["Ricardo", "Navarro", "Diaz", "M"],
-  ["Remedios", "Pascual", "Morales", "F"],
-  ["Eduardo", "Salazar", "Rivera", "M"],
+const PROGRAMS = [
+  { name: "Pension", description: "Social pension", restrictedPeriodDays: 90 },
+  { name: "Medical", description: "Medical assistance", restrictedPeriodDays: 90 },
+  { name: "Grocery", description: "Grocery pack", restrictedPeriodDays: 30 },
 ];
 
 async function main() {
-  await db.auditLog.deleteMany();
-  await db.assistanceClaim.deleteMany();
-  await db.faceData.deleteMany();
-  await db.beneficiary.deleteMany();
-  await db.program.deleteMany();
-  await db.user.deleteMany();
-
-  const hash = (p: string) => bcrypt.hashSync(p, 10);
-  const admin = await db.user.create({
-    data: { username: "admin", passwordHash: hash("Admin@123"), fullName: "Test Admin", role: "ADMIN" },
-  });
-  const staff1 = await db.user.create({
-    data: { username: "staff1", passwordHash: hash("Staff@123"), fullName: "Test Staff One", role: "STAFF" },
-  });
-  await db.user.create({
-    data: { username: "staff2", passwordHash: hash("Staff@123"), fullName: "Test Staff Two", role: "STAFF" },
-  });
-
-  const pension = await db.program.create({
-    data: { name: "Pension", description: "Social pension", restrictedPeriodDays: 90 },
-  });
-  await db.program.create({
-    data: { name: "Medical", description: "Medical assistance", restrictedPeriodDays: 90 },
-  });
-  await db.program.create({
-    data: { name: "Grocery", description: "Grocery pack", restrictedPeriodDays: 30 },
-  });
-  // Inactive program so the "program inactive" case (T18) can be shown
-  await db.program.create({
-    data: { name: "Burial", description: "Burial assistance (inactive)", restrictedPeriodDays: 365, isActive: false },
-  });
-
-  const year = new Date().getFullYear();
-  for (const [i, [firstName, middleName, lastName, sex]] of NAMES.entries()) {
-    const n = String(i + 1).padStart(4, "0");
-    const b = await db.beneficiary.create({
-      data: {
-        referenceNo: `SCBVS-${year}-${n}`,
-        firstName,
-        middleName,
-        lastName,
-        sex,
-        birthDate: new Date(1940 + i * 2, i % 12, 10 + i),
-        address: `${i + 10} Test Street`,
-        barangay: BARANGAYS[i % BARANGAYS.length],
-        contactNo: `0917000${n}`,
-        oscaIdNo: `OSCA-TEST-${n}`,
-        needsManualVerification: true, // seed records have no face data
-        createdById: admin.id,
-      },
-    });
-    if (i === 0) {
-      // Maria already claimed Pension recently, so she is ineligible (T16)
-      await db.assistanceClaim.create({
-        data: {
-          beneficiaryId: b.id,
-          programId: pension.id,
-          amountOrItems: "PHP 1,000",
-          verificationMethod: "MANUAL_ID",
-          releasedById: staff1.id,
-          releasedAt: new Date(Date.now() - 20 * 86400000),
-          remarks: "Seed claim",
-        },
-      });
+  for (const a of ACCOUNTS) {
+    const password = process.env[a.passwordEnv];
+    if (!password || password.length < 8) {
+      throw new Error(`Set ${a.passwordEnv} in .env (at least 8 characters) before seeding.`);
     }
+    await db.user.upsert({
+      where: { username: a.username },
+      update: {},
+      create: { username: a.username, fullName: a.fullName, role: a.role, passwordHash: bcrypt.hashSync(password, 10) },
+    });
   }
-  console.log("Seeded: 3 users, 4 programs, 10 beneficiaries");
+
+  for (const p of PROGRAMS) {
+    if (!(await db.program.findFirst({ where: { name: p.name } }))) await db.program.create({ data: p });
+  }
+  console.log("Seeded: 3 accounts and 3 programs (existing records kept)");
 }
 
 main().finally(() => db.$disconnect());

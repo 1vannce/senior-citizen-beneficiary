@@ -2,7 +2,7 @@
 
 Results for the T01-T28 checklist (plan, Section 8) and the module checks in `SCBVS-Module-Todo.md`.
 "Auto" means a Playwright or Vitest test; "Hand" means checked in the browser.
-All runs use the seed data (`npm run db:seed`) and a production build (`npm run build`, `npx next start`).
+All runs use the test data (`npm run db:seed:test`) and a production build (`npm run build`, `npx next start`).
 
 ## 1. Login (10.0)
 
