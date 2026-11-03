@@ -23,8 +23,6 @@ export default async function DashboardPage() {
   return user.role === "ADMIN" ? <AdminDashboard user={user} /> : <StaffDashboard user={user} />;
 }
 
-const firstName = (u: User) => u.fullName.split(" ")[0];
-
 async function StaffDashboard({ user }: { user: User }) {
   const dayStart = new Date(new Date().setHours(0, 0, 0, 0));
   const [active, flagged, claims, todays, recent] = await Promise.all([
@@ -45,7 +43,7 @@ async function StaffDashboard({ user }: { user: User }) {
       <div>
         <p className="page-eyebrow">STAFF OPERATIONS</p>
         <h1 className="page-title mt-2">
-          {greeting(new Date())}, {firstName(user)}
+          {greeting(new Date())}, {user.fullName}
         </h1>
         <p className="page-sub mt-2">Continue today’s registrations, verifications, and assistance transactions.</p>
       </div>
@@ -139,7 +137,7 @@ async function AdminDashboard({ user }: { user: User }) {
       <div className="space-y-3">
         <p className="text-base font-bold tracking-[1px] text-primary uppercase">Administrator Overview</p>
         <h1 className="page-title">
-          {greeting(new Date())}, {firstName(user)}
+          {greeting(new Date())}, {user.fullName}
         </h1>
         <p className="page-sub">Monitor records, access, and assistance delivery across the OSCA workspace.</p>
       </div>
