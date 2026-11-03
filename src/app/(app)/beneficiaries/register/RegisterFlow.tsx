@@ -243,6 +243,11 @@ export default function RegisterFlow() {
                   SCBVS will create a facial reference used only to verify identity during assistance transactions. Access is
                   restricted to authorized OSCA users. Only a numeric face template is stored, never a photo.
                 </p>
+                <p className="mt-2">
+                  Consent is voluntary. A senior who says no is still registered and served through manual ID verification. Under
+                  the Data Privacy Act of 2012 (RA 10173), the senior may ask the OSCA to see or correct their record, or to withdraw
+                  this consent.
+                </p>
               </div>
             </div>
 
