@@ -19,7 +19,7 @@
   --primary: #1755b3;
   --primary-soft: #e8f1ff;
   --ink: #0b1836;
-  --muted: #69758a;
+  --muted: #56627a; /* 4.5:1 or better on white, the page and table headers */
   --line: #e1e6ee;
   --body-font: var(--font-dm-sans);
   --card-radius: 1.4375rem;
@@ -48,29 +48,44 @@
   --primary: #1e4fb8;
   --primary-soft: #dbeafe;
   --ink: #0f1f3d;
-  --muted: #64748b;
+  --muted: #525e72;
   --line: #e2e8f0;
   --body-font: var(--inter);
   --card-radius: 1rem;
   --card-pad: 1.5rem;
-  --card-title-size: 1rem;
+  --card-title-size: 1.25rem;
   --card-title-weight: 700;
   --card-title-font: var(--inter);
-  --card-sub-size: 0.875rem;
+  --card-sub-size: 1rem;
   --field-h: 2.75rem;
   --field-radius: 0.625rem;
-  --field-size: 0.875rem;
-  --label-size: 0.75rem;
+  --field-size: 1rem;
+  --label-size: 1rem;
   --label-weight: 500;
-  --label-color: #64748b;
+  --label-color: #525e72;
   --btn-h: 2.75rem;
-  --btn-size: 0.875rem;
+  --btn-size: 1rem;
   --title-size: 2rem;
   --title-line: 2.5rem;
-  --sub-size: 0.875rem;
-  --eyebrow-size: 0.75rem;
+  --sub-size: 1rem;
+  --eyebrow-size: 1rem;
   --eyebrow-weight: 400;
   --eyebrow-color: var(--muted);
+}
+
+/* Laptop screens (under 1536px wide) get tighter staff cards so wide tables fit without scrolling. */
+@media (max-width: 1535px) {
+  .theme-staff {
+    --card-pad: 1.75rem;
+  }
+}
+
+/* Older users need text of at least 18px (AGENTS.md), so the small text steps are raised to 1rem. */
+@theme {
+  --text-xs: 1rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5;
 }
 
 @theme inline {
@@ -92,10 +107,10 @@
   --font-inter: var(--inter), Arial, Helvetica, sans-serif;
 }
 
-/* The Figma frames are 1920 x 1080. All sizes are in rem, so the whole layout
-   scales down with the screen and still fits a laptop. */
+/* All sizes are in rem and 1rem is 18px, the smallest text size for older users (AGENTS.md).
+   The Figma frames used 16px, so text is larger than in Figma and the layouts are adjusted to fit. */
 html {
-  font-size: clamp(14px, 0.8333vw, 16px);
+  font-size: 18px;
 }
 
 body {
@@ -168,7 +183,7 @@ body {
     padding-block: 0.75rem;
   }
   .input::placeholder {
-    color: #737783;
+    color: #6b7280;
   }
   .input:focus {
     border-color: var(--primary);
@@ -185,7 +200,7 @@ body {
   .error-text {
     color: var(--danger);
     display: block;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 600;
     margin-top: 0.25rem;
   }
@@ -262,7 +277,7 @@ body {
     border-radius: 0.75rem;
     border-style: solid;
     border-width: 1px;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     padding: 0.875rem 1rem;
   }
   .alert-error {
@@ -289,9 +304,9 @@ body {
   .badge {
     border-radius: 999px;
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 700;
-    line-height: 1rem;
+    line-height: 1.4;
     padding: 0.25rem 0.625rem;
     white-space: nowrap;
   }
@@ -329,20 +344,19 @@ body {
   .data-table th {
     background: var(--table-head);
     color: var(--muted);
-    font-size: 0.6875rem;
+    font-size: 1rem;
     font-weight: 700;
     height: 3rem;
-    letter-spacing: 0.05em;
-    padding-inline: 1rem;
+    letter-spacing: 0.02em;
+    padding: 0.5rem 0.75rem;
     text-transform: uppercase;
-    white-space: nowrap;
   }
   .data-table td {
     border-bottom: 1px solid var(--divider);
     color: #1e293b;
-    font-size: 0.875rem;
+    font-size: 1rem;
     height: 4rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
   }
   .data-table tbody tr:last-child td {
     border-bottom: 0;

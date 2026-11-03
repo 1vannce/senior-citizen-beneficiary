@@ -34,7 +34,7 @@ const columns: ColumnDef<Row>[] = [
       const { id, status } = row.original;
       const active = status === "ACTIVE";
       return (
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
           <Link className="link-action" href={`/beneficiaries/${id}`}>
             View
           </Link>

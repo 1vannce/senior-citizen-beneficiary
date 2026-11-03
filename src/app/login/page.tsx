@@ -58,7 +58,7 @@ export default function LoginPage() {
         }}
       >
         <Image src="/images/osca-seal.png" alt="OSCA seal" width={99} height={99} className="size-25 rounded-full object-cover" />
-        <span className="mt-4 w-fit rounded-full bg-[#e8f1ff] px-3 py-1.5 text-[0.9rem] font-extrabold text-[#1755b3]">
+        <span className="mt-4 w-fit rounded-full bg-[#e8f1ff] px-3 py-1.5 text-base font-extrabold text-[#1755b3]">
           SCBVS Service Portal
         </span>
         <h1 className="mt-2 font-display text-[clamp(3rem,4.27vw,5.125rem)] leading-[1.06] tracking-[-0.025em]">
@@ -81,12 +81,12 @@ export default function LoginPage() {
               </span>
               <span>
                 <span className="block text-lg font-bold">{title}</span>
-                <span className="block text-[0.95rem] text-[#9fb2d6]">{text}</span>
+                <span className="block text-base text-[#9fb2d6]">{text}</span>
               </span>
             </li>
           ))}
         </ul>
-        <p className="mt-8 text-[0.85rem] text-[#93a8d0] 2xl:mt-16">Senior Citizen Benefits &amp; Verification System</p>
+        <p className="mt-8 text-base text-[#93a8d0] 2xl:mt-16">Senior Citizen Benefits &amp; Verification System</p>
       </section>
 
       <section className="relative flex items-center justify-center overflow-hidden p-6">
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <div>
             <p className="font-inter font-semibold text-[#1755b3]">WELCOME BACK</p>
             <h2 className="mt-2 font-inter text-[2.1875rem] text-[#0b1836]">Access your workspace</h2>
-            <p className="mt-1 font-inter text-[#69758a]">Sign in with your assigned Account</p>
+            <p className="mt-1 font-inter text-[#56627a]">Sign in with your assigned Account</p>
           </div>
 
           {error && (

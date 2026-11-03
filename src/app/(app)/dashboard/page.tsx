@@ -50,7 +50,7 @@ async function StaffDashboard({ user }: { user: User }) {
         <p className="page-sub mt-2">Continue today’s registrations, verifications, and assistance transactions.</p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
         <StaffMetric icon={Fingerprint} label="Verifications today" value={todays.length} note={`${manualToday} manual ${manualToday === 1 ? "check" : "checks"}`} />
         <StaffMetric icon={PackageCheck} label="Claims recorded" value={claims} note="Assistance released" />
         <StaffMetric icon={UserPlus} label="Active beneficiaries" value={active} note="Available for service" />
@@ -79,9 +79,9 @@ async function StaffDashboard({ user }: { user: User }) {
                 <span className="mt-1 size-4 shrink-0 rounded-full border-2 border-primary-soft bg-[#2165cc]" aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block font-bold text-ink">{c.program.name}</span>
-                  <span className="block text-[0.85rem] text-muted">{fullName(c.beneficiary)}</span>
+                  <span className="block text-base text-muted">{fullName(c.beneficiary)}</span>
                 </span>
-                <span className="text-right text-[0.85rem] text-muted">
+                <span className="text-right text-base text-muted">
                   {isoDate(c.releasedAt)} · {claimRef(c.id)}
                 </span>
               </li>
@@ -100,7 +100,7 @@ function StaffMetric({ icon: Icon, label, value, note }: { icon: LucideIcon; lab
         <Icon className="size-14" strokeWidth={1.25} aria-hidden />
       </span>
       <span className="min-w-0">
-        <span className="block text-[0.9375rem] font-semibold text-muted">{label}</span>
+        <span className="block text-base font-semibold text-muted">{label}</span>
         <span className="block font-display text-[2.1875rem] font-extrabold text-ink">{value}</span>
         <span className="block text-sm text-muted">{note}</span>
       </span>
@@ -137,14 +137,14 @@ async function AdminDashboard({ user }: { user: User }) {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-[0.6875rem] font-bold tracking-[1px] text-primary uppercase">Administrator Overview</p>
+        <p className="text-base font-bold tracking-[1px] text-primary uppercase">Administrator Overview</p>
         <h1 className="page-title">
           {greeting(new Date())}, {firstName(user)}
         </h1>
         <p className="page-sub">Monitor records, access, and assistance delivery across the OSCA workspace.</p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
         <AdminMetric icon={Users} label="Active beneficiaries" value={active} note={`${inactive} inactive records`} />
         <AdminMetric icon={Users} label="Active system users" value={admins + staff} note={`${admins} Administrator, ${staff} Staff`} />
         <AdminMetric icon={FileText} label="Assistance recorded" value={claims} note="claims released" />

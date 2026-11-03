@@ -59,7 +59,7 @@ export default function AppShell({ role, fullName, today, children }: Props) {
         className={`flex shrink-0 flex-col gap-7 text-white lg:sticky lg:top-0 lg:h-screen ${
           isAdmin
             ? "bg-gradient-to-b from-[#0a2457] to-[#12408f] px-5 py-7 lg:w-65"
-            : "bg-gradient-to-b from-[#0b1836] via-[#102958] via-70% to-[#153266] px-4 py-10 lg:w-84"
+            : "bg-gradient-to-b from-[#0b1836] via-[#102958] via-70% to-[#153266] px-4 py-10 lg:w-72"
         }`}
       >
         {isAdmin ? (
@@ -83,7 +83,7 @@ export default function AppShell({ role, fullName, today, children }: Props) {
         )}
 
         <nav aria-label="Main" className="flex flex-wrap gap-2 lg:flex-col lg:gap-0">
-          {!isAdmin && <p className="mb-3 hidden px-3.5 text-[0.8125rem] font-extrabold tracking-[0.12em] text-[#92a7d1] uppercase lg:block">Workspace</p>}
+          {!isAdmin && <p className="mb-3 hidden px-3.5 text-base font-extrabold tracking-[0.12em] text-[#92a7d1] uppercase lg:block">Workspace</p>}
           {nav.map(({ href, label, icon: Icon }) => {
             const current = active?.href === href;
             return (
@@ -125,7 +125,7 @@ export default function AppShell({ role, fullName, today, children }: Props) {
               </span>
               <span>
                 <span className="block text-[1.025rem] font-bold">{fullName}</span>
-                <span className="block text-[0.85rem] text-[#aebfdf]">OSCA Staff</span>
+                <span className="block text-base text-[#aebfdf]">OSCA Staff</span>
               </span>
             </div>
             <SignOutButton className="mt-3 flex h-12 cursor-pointer items-center gap-2 rounded-[0.8125rem] px-3 text-[1.0625rem] font-bold text-[#dbe5f7] hover:bg-white/8">
@@ -153,17 +153,17 @@ export default function AppShell({ role, fullName, today, children }: Props) {
             <div className="flex items-center gap-4">
               <BackButton onClick={() => router.back()} />
               <div>
-                <p className="text-[0.85rem] text-muted">Senior Citizen Benefits &amp; Verification System</p>
+                <p className="text-base text-muted">Senior Citizen Benefits &amp; Verification System</p>
                 <p className="font-display text-[1.225rem] font-bold text-ink">{title}</p>
               </div>
             </div>
             <div className="flex items-center gap-3.5">
-              <span className="rounded-full bg-primary-soft px-3 py-1.5 text-[0.9rem] leading-4 font-extrabold text-primary">Staff</span>
-              <p className="hidden text-[0.95rem] text-muted sm:block">{today}</p>
+              <span className="rounded-full bg-primary-soft px-3 py-1.5 text-base leading-4 font-extrabold text-primary">Staff</span>
+              <p className="hidden text-base text-muted sm:block">{today}</p>
             </div>
           </header>
         )}
-        <main className={`flex-1 p-5 ${isAdmin ? "lg:p-10" : "lg:px-14 lg:py-10"}`}>{children}</main>
+        <main className={`flex-1 p-5 ${isAdmin ? "lg:p-10" : "lg:px-8 lg:py-10 2xl:px-14"}`}>{children}</main>
       </div>
     </div>
   );
@@ -175,7 +175,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
       type="button"
       aria-label="Go back"
       onClick={onClick}
-      className="flex size-7 cursor-pointer items-center justify-center rounded-full border border-line bg-page text-ink"
+      className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-line bg-page text-ink"
     >
       <ChevronLeft className="size-5" aria-hidden />
     </button>
