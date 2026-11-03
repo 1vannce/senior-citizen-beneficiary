@@ -63,8 +63,8 @@ Run the E2E tests against a production build (`npm run build`, then `npx next st
 
 ## Face matching
 
-- Only the face embedding is stored, never a photo.
-- Cosine similarity, threshold `FACE_MATCH_THRESHOLD` in `.env` (starts at 0.55). Tune it using the Phase 6 accuracy test, then restart the dev server.
+- Only the face embedding is stored, never a photo. It is a list of numbers saved as plain text in the local SQLite file, not encrypted (the narrative says "encrypt"). Protect the laptop with a Windows password and BitLocker drive encryption, and keep backups of `prisma/dev.db` just as safe.
+- Cosine similarity, threshold `FACE_MATCH_THRESHOLD` in `.env`. It is still the starting value 0.55: the webcam accuracy test (to-do section 12) has not been run yet. After the test, put the chosen value and the reason here, in `.env` and in `.env.example`, then restart the server.
 - Two records within 0.03 of the best score are treated as ambiguous and the staff is sent to ID verification.
 - Liveness uses Human's antispoof and liveness models (score of at least 0.5 each). Adjust `LIVENESS_MIN` in `src/components/face/FaceCamera.tsx` if real faces are rejected or photos pass.
 - Model files are served from `public/models` so the app works offline.
@@ -75,7 +75,11 @@ Run the E2E tests against a production build (`npm run build`, then `npx next st
 - **Session timeout:** 15 minutes idle. `IdleTimer` signs out and refreshes the session cookie while the user is active.
 - **Locked accounts:** Admin unlocks them from Admin > Users.
 - **Styling:** follows the Figma file. Staff and Admin have separate visual languages, set by `.theme-staff` and `.theme-admin` in `src/app/globals.css`; the shared classes read those variables. Sizes are in rem and 1rem is 18px, the smallest text size for older users, so text is larger than in the Figma frames (16px). Layouts were adjusted to fit a 1280px-wide browser, which is a 1920 x 1080 laptop at 150% scaling. Icons are `lucide-react`.
-- **Registration fields (decided 11/03):** every field the wizard asks for is saved: suffix, birthplace, civil status, email, emergency contact and the ID details (type, place of issue, issue and expiry dates). The registration API checks them with the same rules as the form (`registerSchema`). City and province are saved inside the address, and the voucher number inside the claim remarks. Records saved before this change show "Not recorded" for these fields. Editing them from Manage Records is not built yet.
-- **Privacy notice:** the consent step says the facial data is used only for identity checks, stores no photo, is voluntary (declining means manual ID, not refusal of service), and names the RA 10173 rights to see, correct or withdraw. The app has no action yet to remove a senior's face data when consent is withdrawn.
+- **Registration fields (decided 11/03):** every field the wizard asks for is saved: suffix, birthplace, civil status, email, emergency contact and the ID details (type, place of issue, issue and expiry dates). The registration API checks them with the same rules as the form (`registerSchema`). City and province are saved inside the address, and the voucher number inside the claim remarks. Records saved before this change show "Not recorded" for these fields. Since module 9 they can also be edited from Manage Records, with the same rules.
+- **Privacy notice:** the consent step says the facial data is used only for identity checks, stores no photo, is voluntary (declining means manual ID, not refusal of service), and names the RA 10173 rights to see, correct or withdraw.
+- **Manage Records (decided 11/03):** the Reactivate action is kept (Admin only, reason required, logged). An edit lists the changed fields in the change log, and a save with no change is refused. Deactivating for "Other" needs a description.
+- **Face data after registration (decided 11/03):** on the record page an Administrator can **Remove face data** when a senior withdraws consent (the template is deleted and the record goes back to manual ID) and **Capture face data** for a record that has none, after the senior consents. Capture uses the same camera and duplicate-face check as registration. Both are logged.
+- **Text size and contrast (decided 11/03):** text is at least 18px on every screen and grey text has at least 4.5:1 contrast. See Styling above.
+- **Login page:** shows no photo of people. The earlier photo of real seniors was removed from the app (it remains in old commits).
 - **Login role buttons:** visual only. The role comes from the account.
 - Pages live in the `src/app/(app)/` route group so they share the logged-in layout. URLs are unchanged.

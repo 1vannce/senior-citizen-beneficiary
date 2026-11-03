@@ -242,3 +242,27 @@ Notes:
 - `.env` and `prisma/dev.db` were never committed. `.env.example` lists every variable the code and seed read. No real emails or phone numbers are in tracked files. Test data uses made-up names only.
 - Not done here: T10 and the webcam halves of T09 and T12-T14 still need a person in front of the camera. The dashboard greets "Good evening, OSCA" because it uses the first word of the account name. Search still treats "Ñ" and "ñ" as different letters (module 2). Both are left for section 13.
 - Tests ran against a separate database; the real `dev.db` was not touched.
+
+## 13. Documents, Submission and Demo (code and document items)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| Search finds a name with Ñ in any letter case ("peña", "PEÑA", "niña peña") | Auto + unit | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| The dashboard greets with the whole account name | Auto | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Deactivating for "Other" needs a description, which goes into the change log | Auto | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Capture face data later: needs consent, blocks a face already on another record, refuses a second capture, clears the manual-ID flag, the face then matches, and the change is logged | Auto (API with made-up face vectors) | Pass (new) | 11/03 | Claude Code (for Tagalicud) |
+| Capture face data later: the camera starts only after the consent box is ticked | Auto (fake camera) + Hand (screenshot) | Pass (new) | 11/03 | Claude Code (for Tagalicud) |
+| Capture face data later with a real face | Hand (webcam) | Not run yet | | |
+| Activity diagrams updated for the final app (UC 7.0 and UC 2.0); the other eight unchanged | Rebuilt + Hand (rendered and checked) | Done | 11/03 | Claude Code (for Tagalicud) |
+| Section 11 final checks re-run: `npm test` (44), `npm run lint`, `npx tsc --noEmit`, `npm run build`, Playwright (46) on a production server; all text 18px+ with no sideways scroll at 1280 x 720 and 1920 x 1080 | Auto + script | Pass | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Bug fixed (module 2): SQLite ignores letter case for A-Z only, so "PEÑA" did not find "Peña". A query with only "PEÑA" returned 0 records on the test database before the fix. Each search word with a letter outside A-Z is now also tried in lower and upper case (`searchWhere` in `src/lib/beneficiaries.ts`). Accents are still exact: "Pena" does not find "Peña".
+- Bug fixed: the dashboard greeted "Good evening, OSCA" because it used the first word of the account name ("OSCA Releasing Staff"). It now uses the whole name.
+- Bug fixed: deactivating for "Other" saved only the word "Other". The dialog now asks for a description and logs "Other: <description>".
+- Decision (with Tagalicud): new **Capture face data** action on the record page (Admin only, active records without face data). It needs the consent box ticked and runs the same camera and duplicate-face check as registration. It saves the consent date, clears the manual-ID flag and logs "Captured face data". The panel opens inside the Facial data card instead of a dialog, so at 1280 x 720 the Capture button is reached by scrolling the page.
+- Decision (with Tagalicud): the narrative, activity diagrams and prototype were already combined and submitted (`SCBVS-Final.pdf`). Only the activity diagrams in `SCBVS-Deliverables` were updated, and the screen changes are listed in its README. The files before the update are in `Archive/deliverables-before-final-app-2026-11-03/`. The submission zip, the prototype screens and the Word file were not changed.
+- Finding: the narrative and the old Capture Facial Data diagram say facial data is encrypted. The app stores the template as plain numbers in the local database, so the diagram now says "numeric face template (no photo)". The README advises a Windows password and BitLocker on the demo laptop.
+- `FACE_MATCH_THRESHOLD` is still 0.55. The README says to record the final value after the webcam accuracy test (section 12).
+- Not done by Claude Code (need people or the webcam): section 12, the demo video, the rehearsal, the lamp and camera setup, and backing up `prisma/dev.db` before the demo.
+- Tests ran against a separate database; the real `dev.db` was not touched.
