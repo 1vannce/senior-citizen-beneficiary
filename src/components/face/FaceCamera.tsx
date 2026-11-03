@@ -50,6 +50,9 @@ function loadHuman(): Promise<Human> {
         segmentation: { enabled: false },
       });
       await human.load();
+      // load() only logs a model that fails to download, so check that every requested model arrived
+      const failed = human.models.stats().modelStats.filter((m) => !m.loaded);
+      if (failed.length > 0) throw new Error(`Face models not loaded: ${failed.map((m) => m.name).join(", ")}`);
       await human.warmup();
       return human;
     })().catch((e) => {
