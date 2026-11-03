@@ -122,6 +122,56 @@ test("assistance journey with manual ID: verify, eligibility, record, history", 
   await expect(page.getByRole("cell", { name: "Medical" }).first()).toBeVisible();
 });
 
+test("T25 duplicate username shows an error", async ({ page }) => {
+  await loginOk(page, "admin", "Admin@123");
+  await page.goto("/admin/users");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByLabel("Username").fill("staff2");
+  await page.getByLabel("Full name").fill("E2E Test");
+  await page.getByLabel("Password").fill("Passw0rd!");
+  await page.getByRole("button", { name: "Save account" }).click();
+  await expect(page.getByText("That username is already taken.")).toBeVisible();
+});
+
+test("T26 admin cannot deactivate their own account", async ({ page }) => {
+  await loginOk(page, "admin", "Admin@123");
+  await page.goto("/admin/users");
+  const me = page.getByRole("row").filter({ has: page.getByRole("cell", { name: "admin", exact: true }) });
+  await me.getByRole("button", { name: "Deactivate" }).click();
+  await page.getByRole("button", { name: "Deactivate account" }).click();
+  await expect(page.getByText("You cannot deactivate your own account")).toBeVisible();
+  await expect(me).toContainText("Active");
+});
+
+test("new account can sign in; password needs 8 characters", async ({ page }) => {
+  await loginOk(page, "admin", "Admin@123");
+  await page.goto("/admin/users");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByLabel("Password").fill("Pass12!");
+  await page.getByRole("button", { name: "Save account" }).click();
+  await expect(page.getByText("Password must be at least 8 characters")).toBeVisible();
+
+  const name = await createUser(page, "new");
+  const row = page.getByRole("row").filter({ has: page.getByRole("cell", { name, exact: true }) });
+  await row.getByRole("button", { name: "Edit" }).click();
+  await page.getByLabel("New password (optional)").fill("abc");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Password must be at least 8 characters")).toBeVisible();
+
+  await page.context().clearCookies();
+  await loginOk(page, name, "Passw0rd!");
+});
+
+test("staff session is refused by the user accounts API", async ({ page }) => {
+  await loginOk(page, "staff1", "Staff@123");
+  const create = await page.request.post("/api/users", {
+    data: { username: "sneaky", fullName: "E2E Test", role: "ADMIN", password: "Passw0rd!" },
+  });
+  expect(create.status()).toBe(403);
+  const edit = await page.request.patch("/api/users/any-id", { data: { fullName: "X", role: "ADMIN", isActive: true } });
+  expect(edit.status()).toBe(403);
+});
+
 async function searchHistory(page: Page, q: string) {
   await page.goto("/history");
   await page.getByLabel("Search beneficiary").fill(q);

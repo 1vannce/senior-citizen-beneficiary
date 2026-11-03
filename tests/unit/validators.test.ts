@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, beneficiarySchema, userCreateSchema } from "@/lib/validators";
+import { ageOn, beneficiarySchema, userCreateSchema, userEditSchema } from "@/lib/validators";
 
 const valid = {
   firstName: "Maria",
@@ -42,5 +42,17 @@ describe("userCreateSchema", () => {
   it("requires a password of at least 8 characters", () => {
     const r = userCreateSchema.safeParse({ username: "abc", fullName: "A B", role: "STAFF", password: "short" });
     expect(r.success).toBe(false);
+    const ok = userCreateSchema.safeParse({ username: "abc", fullName: "A B", role: "STAFF", password: "12345678" });
+    expect(ok.success).toBe(true);
+  });
+});
+
+describe("userEditSchema", () => {
+  const base = { fullName: "A B", role: "STAFF", isActive: true };
+  it("keeps the current password when the field is left empty", () => {
+    expect(userEditSchema.safeParse({ ...base, password: "" }).success).toBe(true);
+  });
+  it("rejects a new password shorter than 8 characters", () => {
+    expect(userEditSchema.safeParse({ ...base, password: "1234567" }).success).toBe(false);
   });
 });
