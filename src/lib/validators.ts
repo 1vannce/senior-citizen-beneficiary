@@ -29,14 +29,19 @@ export const beneficiarySchema = z.object({
 });
 export type BeneficiaryInput = z.infer<typeof beneficiarySchema>;
 
-// The registration wizard asks for more than the data model stores yet. The API keeps only
-// beneficiarySchema's fields; the rest is checked and shown on the review step.
+const isDate = (v: string) => !Number.isNaN(Date.parse(v));
+
+// Everything the registration wizard collects. City and province are saved inside the address.
 export const registerSchema = beneficiarySchema.extend({
   suffix: z.string().trim().optional(),
   birthplace: required("Birthplace"),
   civilStatus: required("Civil status"),
   contactNo: required("Mobile number"),
-  email: z.string().trim().optional(),
+  email: z
+    .string()
+    .trim()
+    .optional()
+    .refine((v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "Enter a valid email address"),
   city: required("City / municipality"),
   province: required("Province"),
   emergencyName: required("Contact name"),
@@ -44,8 +49,11 @@ export const registerSchema = beneficiarySchema.extend({
   emergencyMobile: required("Mobile number"),
   idType: required("ID type"),
   placeOfIssue: required("Place of issue"),
-  issueDate: required("Issue date"),
-  expiryDate: z.string().optional(),
+  issueDate: required("Issue date").refine(isDate, "Enter a valid date"),
+  expiryDate: z
+    .string()
+    .optional()
+    .refine((v) => !v || isDate(v), "Enter a valid date"),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 

@@ -181,7 +181,7 @@ export default function RegisterFlow() {
           <Heading title="Contact and Address" text="Record where and how the beneficiary or a trusted contact can be reached." />
           <div className="grid gap-5 md:grid-cols-3">
             <Text label="Mobile number *" placeholder="Enter Mobile Number" error={errors.contactNo?.message} {...register("contactNo")} />
-            <Text label="Email address" placeholder="Enter Email Address" {...register("email")} />
+            <Text label="Email address" placeholder="Enter Email Address" error={errors.email?.message} {...register("email")} />
             <Text label="House / street *" placeholder="Enter House / Street" error={errors.address?.message} {...register("address")} />
             <Field label="Barangay *" error={errors.barangay?.message}>
               <select className={cls(errors.barangay)} defaultValue="" {...register("barangay")}>
@@ -222,7 +222,7 @@ export default function RegisterFlow() {
             <Text label="Place of issue *" placeholder="Enter Place of Issue" error={errors.placeOfIssue?.message} {...register("placeOfIssue")} />
             <Text label="Issue date *" type="date" error={errors.issueDate?.message} {...register("issueDate")} />
             <div>
-              <Text label="Expiry date" type="date" {...register("expiryDate")} />
+              <Text label="Expiry date" type="date" error={errors.expiryDate?.message} {...register("expiryDate")} />
               <p className="mt-1 text-sm text-muted">Leave blank if the ID has no expiry.</p>
             </div>
           </div>

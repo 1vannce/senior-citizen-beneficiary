@@ -20,6 +20,7 @@ type Props = {
   name: string;
   referenceNo: string;
   consentDate: string | null;
+  details: { label: string; value: string }[];
   audit: Audit[];
   action?: string;
   initial: Initial;
@@ -27,7 +28,7 @@ type Props = {
 
 const DEACTIVATE_REASONS = ["Transferred residence", "Deceased", "Other"];
 
-export default function RecordEditor({ id, status, name, referenceNo, consentDate, audit, action, initial }: Props) {
+export default function RecordEditor({ id, status, name, referenceNo, consentDate, details, audit, action, initial }: Props) {
   const router = useRouter();
   const active = status === "ACTIVE";
   const [editing, setEditing] = useState(action === "edit" && active);
@@ -221,6 +222,9 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
             <Info label="OSCA ID number" value={initial.oscaIdNo} />
             <Info label="Birth date" value={initial.birthDate} />
             <Info label="Sex" value={initial.sex === "F" ? "Female" : "Male"} />
+            {details.map((d) => (
+              <Info key={d.label} label={d.label} value={d.value} />
+            ))}
           </dl>
         ) : (
           <div className="space-y-3">

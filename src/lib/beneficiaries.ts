@@ -3,8 +3,8 @@ import { db } from "./db";
 import { findMatch, type MatchResult } from "./face";
 import { ageOn } from "./validators";
 
-export function fullName(b: Pick<Beneficiary, "firstName" | "middleName" | "lastName">) {
-  return [b.firstName, b.middleName, b.lastName].filter(Boolean).join(" ");
+export function fullName(b: Pick<Beneficiary, "firstName" | "middleName" | "lastName"> & { suffix?: string | null }) {
+  return [b.firstName, b.middleName, b.lastName, b.suffix].filter(Boolean).join(" ");
 }
 
 export function summary(b: Beneficiary) {

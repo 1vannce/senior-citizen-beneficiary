@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, beneficiarySchema, userCreateSchema, userEditSchema } from "@/lib/validators";
+import { ageOn, beneficiarySchema, registerSchema, userCreateSchema, userEditSchema } from "@/lib/validators";
 
 const valid = {
   firstName: "Maria",
@@ -35,6 +35,32 @@ describe("beneficiarySchema", () => {
     if (!r.success) {
       expect(Object.keys(r.error.flatten().fieldErrors)).toEqual(expect.arrayContaining(["oscaIdNo", "firstName"]));
     }
+  });
+});
+
+describe("registerSchema", () => {
+  const full = {
+    ...valid,
+    birthplace: "Cebu City",
+    civilStatus: "Single",
+    contactNo: "09170000000",
+    city: "Cebu City",
+    province: "Cebu",
+    emergencyName: "Ana",
+    emergencyRelationship: "Child",
+    emergencyMobile: "09170000001",
+    idType: "OSCA ID",
+    placeOfIssue: "Cebu City",
+    issueDate: "2020-01-15",
+  };
+  it("accepts a full registration with optional email and expiry left empty", () => {
+    expect(registerSchema.safeParse({ ...full, email: "", expiryDate: "" }).success).toBe(true);
+  });
+  it("rejects a badly written email address", () => {
+    expect(registerSchema.safeParse({ ...full, email: "ana@" }).success).toBe(false);
+  });
+  it("rejects a missing emergency contact", () => {
+    expect(registerSchema.safeParse({ ...full, emergencyName: "" }).success).toBe(false);
   });
 });
 

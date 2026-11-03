@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireApiUser } from "@/lib/session";
 import { writeAudit } from "@/lib/audit";
-import { beneficiarySchema, embeddingSchema } from "@/lib/validators";
+import { embeddingSchema, registerSchema } from "@/lib/validators";
 import { matchFace, nextReferenceNo, searchWhere, summary } from "@/lib/beneficiaries";
 
 // Search by name, reference number or OSCA ID. `osca` does an exact OSCA ID lookup.
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   const { user } = auth;
 
   const body = await req.json().catch(() => null);
-  const parsed = beneficiarySchema.safeParse(body?.data);
+  const parsed = registerSchema.safeParse(body?.data);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Please fix the highlighted fields.", fields: parsed.error.flatten().fieldErrors },
@@ -88,6 +88,17 @@ export async function POST(req: Request) {
         barangay: data.barangay,
         contactNo: data.contactNo || null,
         oscaIdNo: data.oscaIdNo,
+        suffix: data.suffix || null,
+        birthplace: data.birthplace,
+        civilStatus: data.civilStatus,
+        email: data.email || null,
+        emergencyName: data.emergencyName,
+        emergencyRelationship: data.emergencyRelationship,
+        emergencyMobile: data.emergencyMobile,
+        idType: data.idType,
+        idPlaceOfIssue: data.placeOfIssue,
+        idIssueDate: new Date(data.issueDate),
+        idExpiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
         needsManualVerification: !embedding,
         createdById: user.id,
       },

@@ -40,7 +40,19 @@ model Beneficiary {
   barangay                String
   contactNo               String?
   oscaIdNo                String   @unique
-  status                  String   @default("ACTIVE") // ACTIVE | DEACTIVATED
+  // Registration details (UC 1.0). Optional so records saved before these columns stay valid.
+  suffix                  String?
+  birthplace              String?
+  civilStatus             String?
+  email                   String?
+  emergencyName           String?
+  emergencyRelationship   String?
+  emergencyMobile         String?
+  idType                  String?
+  idPlaceOfIssue          String?
+  idIssueDate             DateTime?
+  idExpiryDate            DateTime?
+  status                 String   @default("ACTIVE") // ACTIVE | DEACTIVATED
   needsManualVerification Boolean  @default(false)
   createdById             String
   createdAt               DateTime @default(now())

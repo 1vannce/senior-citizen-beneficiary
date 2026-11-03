@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requirePageUser } from "@/lib/session";
 import { fullName } from "@/lib/beneficiaries";
-import { dateTime, longDate } from "@/lib/format";
+import { dateTime, isoDate, longDate } from "@/lib/format";
 import RecordEditor from "./RecordEditor";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ action?: string }> };
@@ -27,6 +27,17 @@ export default async function RecordPage({ params, searchParams }: Props) {
       name={fullName(b)}
       referenceNo={b.referenceNo}
       consentDate={b.faceData ? longDate(b.faceData.consentGivenAt) : null}
+      details={[
+        { label: "Birthplace", value: b.birthplace },
+        { label: "Civil status", value: b.civilStatus },
+        { label: "Email address", value: b.email },
+        { label: "Emergency contact", value: [b.emergencyName, b.emergencyRelationship].filter(Boolean).join(", ") },
+        { label: "Emergency contact number", value: b.emergencyMobile },
+        { label: "ID type", value: b.idType },
+        { label: "ID place of issue", value: b.idPlaceOfIssue },
+        { label: "ID issue date", value: b.idIssueDate && isoDate(b.idIssueDate) },
+        { label: "ID expiry date", value: b.idExpiryDate ? isoDate(b.idExpiryDate) : b.idIssueDate && "No expiry" },
+      ].map((d) => ({ label: d.label, value: d.value || "Not recorded" }))}
       audit={audit.map((a) => ({
         id: a.id,
         date: dateTime(a.createdAt),
