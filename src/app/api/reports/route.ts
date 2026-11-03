@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireApiUser } from "@/lib/session";
 import { fullName } from "@/lib/beneficiaries";
-import { isoDate } from "@/lib/format";
+import { isoDate, verifiedBy } from "@/lib/format";
 import { releasedBetween } from "@/lib/reports";
 
 // Generate Reports (UC 8.0). The masterlist has ACTIVE records, the inactive report the rest.
@@ -56,6 +56,7 @@ export async function GET(req: Request) {
         program: c.program.name,
         amountOrItems: c.amountOrItems,
         verificationMethod: c.verificationMethod,
+        verifiedBy: verifiedBy(c.verificationMethod, c.representativeName),
       })),
     });
   }

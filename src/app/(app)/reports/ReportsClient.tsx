@@ -35,7 +35,7 @@ const CLAIM_COLS = [
   ["barangay", "Barangay"],
   ["program", "Program"],
   ["amountOrItems", "Amount / items"],
-  ["verificationMethod", "Verified by"],
+  ["verifiedBy", "Verified by"],
 ] as const;
 
 // Amounts are free text: "PHP 1,000" adds up, anything else ("122 packs") counts as items.

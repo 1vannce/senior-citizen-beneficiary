@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { isoDate } from "@/lib/format";
+import { isoDate, verifiedBy } from "@/lib/format";
+
+describe("verifiedBy", () => {
+  it("reads as words, with the representative's name when there is one", () => {
+    expect(verifiedBy("MANUAL_ID")).toBe("Manual ID");
+    expect(verifiedBy("FACE", null)).toBe("Face match");
+    expect(verifiedBy("REPRESENTATIVE", "Ana Cruz")).toBe("Representative (Ana Cruz)");
+  });
+});
 
 describe("isoDate", () => {
   it("gives the Manila date, which is a day ahead of UTC before 8 AM", () => {

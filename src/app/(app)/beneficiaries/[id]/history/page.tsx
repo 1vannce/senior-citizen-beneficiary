@@ -3,10 +3,8 @@ import { db } from "@/lib/db";
 import { requirePageUser } from "@/lib/session";
 import { summary } from "@/lib/beneficiaries";
 import { PageHeader, PersonCard } from "@/components/ui";
-import { claimRef, isoDate } from "@/lib/format";
+import { claimRef, isoDate, verifiedBy } from "@/lib/format";
 import ClaimsTable from "./ClaimsTable";
-
-const METHOD = { FACE: "Face match", MANUAL_ID: "Manual ID", REPRESENTATIVE: "Representative" } as Record<string, string>;
 
 export default async function HistoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePageUser();
@@ -46,7 +44,7 @@ export default async function HistoryDetailPage({ params }: { params: Promise<{ 
           value: c.amountOrItems,
           reference: claimRef(c.id),
           releasedBy: c.releasedBy.fullName,
-          verifiedBy: `${METHOD[c.verificationMethod]}${c.representativeName ? ` (${c.representativeName})` : ""}`,
+          verifiedBy: verifiedBy(c.verificationMethod, c.representativeName),
           remarks: c.remarks ?? "",
         }))}
       />

@@ -37,3 +37,11 @@ export function greeting(d: Date) {
 export function claimRef(id: string) {
   return `CLM-${id.slice(-6).toUpperCase()}`;
 }
+
+const METHOD_LABELS: Record<string, string> = { FACE: "Face match", MANUAL_ID: "Manual ID", REPRESENTATIVE: "Representative" };
+
+// How identity was checked for a claim, e.g. "Representative (Ana Cruz)"
+export function verifiedBy(method: string, representativeName?: string | null) {
+  const label = METHOD_LABELS[method] ?? method;
+  return representativeName ? `${label} (${representativeName})` : label;
+}
