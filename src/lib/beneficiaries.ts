@@ -1,4 +1,4 @@
-import type { Beneficiary } from "@prisma/client";
+import type { Beneficiary, Prisma } from "@prisma/client";
 import { db } from "./db";
 import { findMatch, type MatchResult } from "./face";
 import { ageOn } from "./validators";
@@ -17,6 +17,23 @@ export function summary(b: Beneficiary) {
     age: ageOn(b.birthDate),
     status: b.status,
     needsManualVerification: b.needsManualVerification,
+  };
+}
+
+// Every word must appear in some field, so "Maria Reyes" finds "Maria Santos Reyes".
+// SQLite `contains` ignores letter case for A-Z.
+export function searchWhere(q: string): Prisma.BeneficiaryWhereInput {
+  const words = q.trim().split(/\s+/).filter(Boolean);
+  return {
+    AND: words.map((w) => ({
+      OR: [
+        { firstName: { contains: w } },
+        { middleName: { contains: w } },
+        { lastName: { contains: w } },
+        { referenceNo: { contains: w } },
+        { oscaIdNo: { contains: w } },
+      ],
+    })),
   };
 }
 

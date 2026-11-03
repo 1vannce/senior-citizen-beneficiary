@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { requireApiUser } from "@/lib/session";
 import { writeAudit } from "@/lib/audit";
 import { beneficiarySchema, embeddingSchema } from "@/lib/validators";
-import { matchFace, nextReferenceNo, summary } from "@/lib/beneficiaries";
+import { matchFace, nextReferenceNo, searchWhere, summary } from "@/lib/beneficiaries";
 
 // Search by name, reference number or OSCA ID. `osca` does an exact OSCA ID lookup.
 export async function GET(req: Request) {
@@ -21,15 +21,7 @@ export async function GET(req: Request) {
   if (!q) return NextResponse.json({ results: [] });
 
   const found = await db.beneficiary.findMany({
-    where: {
-      OR: [
-        { firstName: { contains: q } },
-        { middleName: { contains: q } },
-        { lastName: { contains: q } },
-        { referenceNo: { contains: q } },
-        { oscaIdNo: { contains: q } },
-      ],
-    },
+    where: searchWhere(q),
     orderBy: { lastName: "asc" },
     take: 50,
   });
