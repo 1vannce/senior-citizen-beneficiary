@@ -16,6 +16,7 @@ const PROGRAMS = [
   { name: "Pension", description: "Social pension", restrictedPeriodDays: 90 },
   { name: "Medical", description: "Medical assistance", restrictedPeriodDays: 90 },
   { name: "Grocery", description: "Grocery pack", restrictedPeriodDays: 30 },
+  { name: "Burial", description: "Burial assistance", restrictedPeriodDays: 365 },
 ];
 
 async function main() {
@@ -34,7 +35,7 @@ async function main() {
   for (const p of PROGRAMS) {
     if (!(await db.program.findFirst({ where: { name: p.name } }))) await db.program.create({ data: p });
   }
-  console.log("Seeded: 3 accounts and 3 programs (existing records kept)");
+  console.log("Seeded: 3 accounts and 4 programs (existing records kept)");
 }
 
 main().finally(() => db.$disconnect());

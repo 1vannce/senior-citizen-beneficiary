@@ -30,11 +30,11 @@ Allow camera access when the browser asks. `localhost` works without HTTPS.
 | staff1 | OSCA Releasing Staff | STAFF |
 | staff2 | OSCA Registration Staff | STAFF |
 
-It also adds the programs Pension (90-day restricted period), Medical (90) and Grocery (30). It starts with no beneficiaries; register them in the app.
+It also adds the programs Pension (90-day restricted period), Medical (90), Grocery (30) and Burial (365). It starts with no beneficiaries; register them in the app.
 
 ## Test data
 
-`npm run db:seed:test` **erases the database** and loads made-up data for the automated tests. Use it only on a development copy, never on the real records. It sets the passwords `Admin@123` (admin) and `Staff@123` (staff1, staff2), adds the inactive Burial program (T18) and 10 made-up beneficiaries. "Maria Santos Reyes" already has a recent Pension claim, so she is ineligible for Pension (T16). Test beneficiaries have no face data.
+`npm run db:seed:test` **erases the database** and loads made-up data for the automated tests. Use it only on a development copy, never on the real records. It sets the passwords `Admin@123` (admin) and `Staff@123` (staff1, staff2), makes Burial inactive (T18) and adds 10 made-up beneficiaries. "Maria Santos Reyes" already has a recent Pension claim, so she is ineligible for Pension (T16). Test beneficiaries have no face data.
 
 ## Commands
 
