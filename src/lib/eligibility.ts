@@ -1,3 +1,5 @@
+import { isoDate, longDate } from "./format";
+
 export type EligibilityInput = {
   beneficiaryStatus: string;
   program: { isActive: boolean; restrictedPeriodDays: number } | null;
@@ -15,6 +17,13 @@ export type EligibilityResult =
 
 const DAY_MS = 86_400_000;
 
+// The period counts calendar days in Manila time, so a claim on 1 Aug with a 90-day period
+// allows the next claim from the start of 30 Oct, whatever the time of the first claim.
+export function eligibleAgainOn(lastClaimAt: Date, restrictedPeriodDays: number): Date {
+  const claimDay = new Date(`${isoDate(lastClaimAt)}T00:00:00+08:00`); // Manila has no daylight saving
+  return new Date(claimDay.getTime() + restrictedPeriodDays * DAY_MS);
+}
+
 export function checkEligibility(input: EligibilityInput): EligibilityResult {
   const now = input.now ?? new Date();
 
@@ -30,12 +39,12 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
     return { eligible: false, code: "DEACTIVATED", message: "This beneficiary record is deactivated." };
   }
   if (input.lastClaimAt) {
-    const nextDate = new Date(input.lastClaimAt.getTime() + input.program.restrictedPeriodDays * DAY_MS);
-    if (nextDate > now) {
+    const nextDate = eligibleAgainOn(input.lastClaimAt, input.program.restrictedPeriodDays);
+    if (now < nextDate) {
       return {
         eligible: false,
         code: "WITHIN_RESTRICTED_PERIOD",
-        message: `Last claim was inside the ${input.program.restrictedPeriodDays}-day restricted period. Eligible again on ${nextDate.toLocaleDateString("en-PH")}.`,
+        message: `Last claim was inside the ${input.program.restrictedPeriodDays}-day restricted period. Eligible again on ${longDate(nextDate)}.`,
       };
     }
   }
