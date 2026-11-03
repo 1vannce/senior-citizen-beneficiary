@@ -102,8 +102,8 @@ export default function FaceCamera({ actionLabel, hint, aside, onCapture, onGive
       }
       video.srcObject = stream;
       await video.play().catch(() => {});
-      setStatus("running");
 
+      let firstFrame = true;
       while (!stopped) {
         try {
           const result = await human.detect(video);
@@ -122,6 +122,11 @@ export default function FaceCamera({ actionLabel, hint, aside, onCapture, onGive
           }
           liveRef.current = next;
           setLive(next);
+          // Enable capture only after a frame has been checked, so an early click does not use up a try
+          if (firstFrame) {
+            firstFrame = false;
+            setStatus("running");
+          }
         } catch {
           // A single failed frame is not fatal; try the next one.
         }
