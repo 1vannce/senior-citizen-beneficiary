@@ -36,6 +36,7 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
   const [dialog, setDialog] = useState(action === "deactivate" && active);
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [statusReason, setStatusReason] = useState("");
+  const [otherDetail, setOtherDetail] = useState("");
   const [statusError, setStatusError] = useState("");
   const [faceDialog, setFaceDialog] = useState(false);
   const [faceReason, setFaceReason] = useState("");
@@ -64,16 +65,21 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
     } else setMessage({ type: "error", text: body.error ?? "Update failed." });
   }
 
+  // "Other" needs a description, so the change log says what the reason was
+  const needsDetail = active && statusReason === "Other";
+  const fullReason = needsDetail ? `Other: ${otherDetail.trim()}` : statusReason;
+
   async function changeStatus() {
     setStatusError("");
     const res = await fetch(`/api/beneficiaries/${id}/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: active ? "DEACTIVATED" : "ACTIVE", reason: statusReason }),
+      body: JSON.stringify({ status: active ? "DEACTIVATED" : "ACTIVE", reason: fullReason }),
     });
     const body = await res.json();
     if (res.ok) {
       setStatusReason("");
+      setOtherDetail("");
       setDialog(false);
       setMessage({ type: "ok", text: `${name} ${active ? "deactivated" : "reactivated"}. The change was logged.` });
       router.refresh();
@@ -392,14 +398,21 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
             </p>
           )}
           {active ? (
-            <Field label="Reason for deactivation *">
-              <select className="input" value={statusReason} onChange={(e) => setStatusReason(e.target.value)}>
-                <option value="">Select a reason</option>
-                {DEACTIVATE_REASONS.map((r) => (
-                  <option key={r}>{r}</option>
-                ))}
-              </select>
-            </Field>
+            <>
+              <Field label="Reason for deactivation *">
+                <select className="input" value={statusReason} onChange={(e) => setStatusReason(e.target.value)}>
+                  <option value="">Select a reason</option>
+                  {DEACTIVATE_REASONS.map((r) => (
+                    <option key={r}>{r}</option>
+                  ))}
+                </select>
+              </Field>
+              {needsDetail && (
+                <Field label="Describe the reason *">
+                  <input className="input" value={otherDetail} onChange={(e) => setOtherDetail(e.target.value)} />
+                </Field>
+              )}
+            </>
           ) : (
             <Field label="Reason for reactivation *">
               <input className="input" value={statusReason} onChange={(e) => setStatusReason(e.target.value)} />
@@ -409,7 +422,7 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
             <button className="btn btn-secondary" onClick={() => setDialog(false)}>
               Cancel
             </button>
-            <button className={`btn ${active ? "btn-danger" : "btn-primary"}`} disabled={!statusReason.trim()} onClick={changeStatus}>
+            <button className={`btn ${active ? "btn-danger" : "btn-primary"}`} disabled={!statusReason.trim() || (needsDetail && !otherDetail.trim())} onClick={changeStatus}>
               {active ? "Deactivate record" : "Reactivate record"}
             </button>
           </div>
