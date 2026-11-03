@@ -21,6 +21,7 @@ export default function UsersClient({ rows, log, meId }: { rows: Row[]; log: Log
   const [editing, setEditing] = useState<Row | null>(null);
   const [confirming, setConfirming] = useState<Row | null>(null);
   const [notice, setNotice] = useState<{ type: "ok" | "error"; text: string } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   async function patch(u: Row, changes: Partial<Row> & { password?: string; unlock?: boolean }) {
     const res = await fetch(`/api/users/${u.id}`, {
@@ -30,6 +31,7 @@ export default function UsersClient({ rows, log, meId }: { rows: Row[]; log: Log
     });
     const body = await res.json();
     setConfirming(null);
+    setFieldErrors(body.fields ?? {});
     if (res.ok) {
       setNotice({ type: "ok", text: "Account updated." });
       setEditing(null);
@@ -93,7 +95,21 @@ export default function UsersClient({ rows, log, meId }: { rows: Row[]; log: Log
   );
 
   if (editing) {
-    return <EditUser key={editing.id} u={editing} isSelf={editing.id === meId} banner={banner} onCancel={() => setEditing(null)} onSave={(c) => patch(editing, c)} />;
+    return (
+      <EditUser
+        key={editing.id}
+        u={editing}
+        isSelf={editing.id === meId}
+        banner={banner}
+        errors={fieldErrors}
+        onCancel={() => {
+          setEditing(null);
+          setNotice(null);
+          setFieldErrors({});
+        }}
+        onSave={(c) => patch(editing, c)}
+      />
+    );
   }
 
   if (view === "create") {
@@ -252,12 +268,14 @@ function EditUser({
   u,
   isSelf,
   banner,
+  errors,
   onCancel,
   onSave,
 }: {
   u: Row;
   isSelf: boolean;
   banner: React.ReactNode;
+  errors: Record<string, string[]>;
   onCancel: () => void;
   onSave: (c: Partial<Row> & { password?: string }) => void;
 }) {
@@ -272,8 +290,8 @@ function EditUser({
         <h2 className="card-title">Account information</h2>
         {isSelf && <p className="alert alert-info">You are editing your own account. You cannot remove your own Admin role or deactivate it.</p>}
         <div className="grid gap-5 md:grid-cols-2">
-          <Field label="Full name *">
-            <input className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          <Field label="Full name *" error={errors.fullName?.[0]}>
+            <input className={`input ${errors.fullName ? "input-error" : ""}`} value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </Field>
           <Field label="Username">
             <input className="input" readOnly value={u.username} />
@@ -284,8 +302,8 @@ function EditUser({
               <option value="ADMIN">Administrator</option>
             </select>
           </Field>
-          <Field label="New password (optional)">
-            <input type="password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Field label="New password (optional)" error={errors.password?.[0]}>
+            <input type="password" className={`input ${errors.password ? "input-error" : ""}`} value={password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
         </div>
         <div className="flex gap-3">
