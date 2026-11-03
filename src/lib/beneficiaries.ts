@@ -60,10 +60,15 @@ export async function matchFace(embedding: number[]): Promise<MatchResult> {
 // A claim released in this window counts as a transaction still being handled at the counter.
 export const ONGOING_TRANSACTION_MINUTES = 10;
 
+export function isOngoingTransaction(lastReleasedAt: Date | null, now = new Date()) {
+  return !!lastReleasedAt && now.getTime() - lastReleasedAt.getTime() <= ONGOING_TRANSACTION_MINUTES * 60_000;
+}
+
 export async function hasOngoingTransaction(beneficiaryId: string) {
-  const since = new Date(Date.now() - ONGOING_TRANSACTION_MINUTES * 60_000);
-  const count = await db.assistanceClaim.count({
-    where: { beneficiaryId, releasedAt: { gte: since } },
+  const last = await db.assistanceClaim.findFirst({
+    where: { beneficiaryId },
+    orderBy: { releasedAt: "desc" },
+    select: { releasedAt: true },
   });
-  return count > 0;
+  return isOngoingTransaction(last?.releasedAt ?? null);
 }
