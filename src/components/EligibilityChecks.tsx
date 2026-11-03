@@ -7,14 +7,20 @@ type Props = { result: Eligibility; beneficiaryStatus: string; barangay: string 
 type Check = { title: string; state: "pass" | "fail" | "skipped"; text: string };
 
 // checkEligibility stops at the first failure, so later checks were not evaluated.
+// An inactive program is checked first and no other check is made (alternate course 3a).
 function checksFor({ result, beneficiaryStatus, barangay }: Props): Check[] {
   const programOk = result.code !== "PROGRAM_INACTIVE";
   const activeOk = beneficiaryStatus === "ACTIVE";
+  const activeState = !programOk ? "skipped" : activeOk ? "pass" : "fail";
   const claimState = result.code === "WITHIN_RESTRICTED_PERIOD" ? "fail" : programOk && activeOk ? "pass" : "skipped";
   return [
-    { title: "Active beneficiary record", state: activeOk ? "pass" : "fail", text: activeOk ? "Record is active." : "This beneficiary record is deactivated." },
+    {
+      title: "Active beneficiary record",
+      state: activeState,
+      text: activeState === "skipped" ? "Not checked." : activeOk ? "Record is active." : "This beneficiary record is deactivated.",
+    },
     { title: "Program is configured", state: programOk ? "pass" : "fail", text: programOk ? "Program rules are available." : "No current OSCA rules are available." },
-    { title: "Barangay coverage", state: "pass", text: `${barangay} is covered.` },
+    { title: "Barangay coverage", state: programOk ? "pass" : "skipped", text: programOk ? `${barangay} is covered.` : "Not checked." },
     {
       title: "Restricted claim period",
       state: claimState,
