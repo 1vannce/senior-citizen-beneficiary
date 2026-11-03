@@ -34,6 +34,7 @@ const API: Call[] = [
   ["POST", "/api/beneficiaries", false],
   ["PATCH", `/api/beneficiaries/${ID}`, true],
   ["POST", `/api/beneficiaries/${ID}/status`, true],
+  ["POST", `/api/beneficiaries/${ID}/face`, true],
   ["DELETE", `/api/beneficiaries/${ID}/face`, true],
   ["POST", "/api/face/match", false],
   ["POST", "/api/eligibility", false],
@@ -56,6 +57,8 @@ test("a visitor who is not signed in is sent to the login page and refused by ev
 
 test("staff are kept out of every Admin page and Admin API route", async ({ page }) => {
   await loginOk(page, "staff1", "Staff@123");
+  // The greeting uses the whole account name, not just its first word
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("OSCA Releasing Staff");
   for (const path of ADMIN_PAGES) {
     await page.goto(path);
     await expect(page, path).toHaveURL(/\/dashboard$/);

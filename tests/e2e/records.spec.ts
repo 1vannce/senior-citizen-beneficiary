@@ -13,12 +13,12 @@ async function loginOk(page: Page, username: string, password: string) {
 // Made-up face vector
 const randomFace = () => Array.from({ length: 128 }, () => Math.random() * 2 - 1);
 
-async function register(request: APIRequestContext, firstName: string, embedding?: number[]) {
+async function register(request: APIRequestContext, firstName: string, embedding?: number[], lastName = "Recordtest") {
   const res = await request.post("/api/beneficiaries", {
     data: {
       data: {
         firstName,
-        lastName: "Recordtest",
+        lastName,
         birthDate: "1950-01-01",
         sex: "F",
         address: "1 Test Street",
@@ -202,4 +202,68 @@ test("removing face data on withdrawal of consent flags the record and keeps it"
 
   await openLog(page);
   await expect(logRow(page, "Removed face data")).toContainText("Senior withdrew consent in writing");
+});
+
+test("deactivating for an 'Other' reason needs a description, which goes into the change log", async ({ page }) => {
+  await loginOk(page, "admin", "Admin@123");
+  const person = await register(page.request, "Otherreason");
+  await page.goto(`/beneficiaries/${person.id}`);
+  await page.getByRole("button", { name: "Deactivate" }).click();
+  await page.getByLabel("Reason for deactivation").selectOption("Other");
+  const confirm = page.getByRole("button", { name: "Deactivate record" });
+  await expect(confirm).toBeDisabled();
+  await page.getByLabel("Describe the reason").fill("Moved abroad to live with family");
+  await confirm.click();
+  await expect(page.getByText(`${person.name} deactivated.`)).toBeVisible();
+  await openLog(page);
+  await expect(logRow(page, "Deactivated beneficiary")).toContainText("Other: Moved abroad to live with family");
+});
+
+test("search finds a name with Ñ in any letter case", async ({ page }) => {
+  await loginOk(page, "staff1", "Staff@123");
+  const person = await register(page.request, "Niña", undefined, "Peña");
+  for (const q of ["peña", "PEÑA", "niña peña"]) {
+    const { results } = await (await page.request.get(`/api/beneficiaries?q=${encodeURIComponent(q)}`)).json();
+    expect(results.map((r: { id: string }) => r.id), q).toContain(person.id);
+  }
+});
+
+test("capturing face data later, with consent, for a record that has none", async ({ page }) => {
+  await loginOk(page, "admin", "Admin@123");
+  const face = randomFace();
+  const person = await register(page.request, "Latecapture");
+  const capture = (id: string, data: Record<string, unknown>) => page.request.post(`/api/beneficiaries/${id}/face`, { data });
+
+  expect((await capture(person.id, { embedding: face })).status()).toBe(400); // no consent
+  expect((await capture(person.id, { consent: true, embedding: face })).status()).toBe(201);
+  expect((await capture(person.id, { consent: true, embedding: randomFace() })).status()).toBe(409); // already stored
+
+  // The record is no longer flagged and the face now matches it
+  const after = (await (await page.request.get(`/api/beneficiaries?q=${person.referenceNo}`)).json()).results[0];
+  expect(after.needsManualVerification).toBe(false);
+  const match = await (await page.request.post("/api/face/match", { data: { embedding: face } })).json();
+  expect(match.beneficiary.id).toBe(person.id);
+
+  // The same face cannot be captured for another record
+  const other = await register(page.request, "Latecapturetwo");
+  const dupe = await capture(other.id, { consent: true, embedding: face.map((x) => x + Math.random() * 0.05) });
+  expect(dupe.status()).toBe(409);
+  expect((await dupe.json()).existing.id).toBe(person.id);
+
+  await page.goto(`/beneficiaries/${person.id}`);
+  await expect(page.getByText("Consent status: Granted")).toBeVisible();
+  await openLog(page);
+  await expect(logRow(page, "Captured face data")).toContainText("Face data captured with the senior's consent");
+});
+
+test("the capture panel starts the camera only after consent", async ({ page }) => {
+  test.setTimeout(120_000); // the face models take a while to load in a headless browser
+  await loginOk(page, "admin", "Admin@123");
+  const person = await register(page.request, "Cameradialog");
+  await page.goto(`/beneficiaries/${person.id}`);
+  await page.getByRole("button", { name: "Capture face data" }).click();
+  await expect(page.getByRole("button", { name: "Capture facial data" })).toBeHidden();
+  await page.getByLabel(/The senior freely gave consent/).check();
+  await expect(page.getByText("Camera ready")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("No face found. Please reposition and face the camera.")).toBeVisible();
 });
