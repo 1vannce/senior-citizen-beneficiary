@@ -154,7 +154,7 @@ Notes:
 - Bug fixed: the change log's column was labelled "Field" but showed codes such as "UPDATE". It is now "Action" with readable labels ("Updated beneficiary"). The reason of an edit now ends with the fields that changed, for example "Corrected contact details (changed: Civil status, Email address)". The labels are shared with the dashboard's activity list (`ACTION_LABELS` in `src/lib/constants.ts`).
 - The ongoing-transaction rule is now a separate function (`isOngoingTransaction` in `src/lib/beneficiaries.ts`) with unit tests, as `AGENTS.md` asks. A claim exactly 10 minutes old still blocks deactivation, as before.
 - Deactivating with the reason "Other" saves only the word "Other". There is no box to describe it.
-- Finding for section 11: on long pages the dark sidebar background stops at the bottom of the screen instead of running to the end of the page.
+- Correction (section 11): the sidebar stays in place while the page scrolls. It only looked cut off in full-page screenshots, which do not scroll.
 - Tests ran against a separate database; the real `dev.db` was not touched.
 
 ## 10. Generate Reports (8.0)
@@ -175,4 +175,70 @@ Notes:
 - Bug fixed: the "Verified by" column showed codes such as "MANUAL_ID". It now reads "Manual ID", "Face match" or "Representative (name)", the same labels as the assistance history (`verifiedBy` in `src/lib/format.ts`).
 - In Excel the date columns show "########" until the column is widened. The values are real dates (shown as 03/11/2026 with this laptop's settings).
 - "Export PDF" opens the print window, where the user picks "Save as PDF". There is no separate PDF file.
+- Tests ran against a separate database; the real `dev.db` was not touched.
+
+## 11. Whole-System Checks
+
+### T01-T28 summary
+
+Status of every checklist row after modules 1-10. "Auto" rows pass in the Playwright suite on a production build; webcam rows still need a person in front of the camera.
+
+| ID | Test | How | Result | Date | Tester |
+|---|---|---|---|---|---|
+| T01 | Wrong password | Auto + Hand | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T02 | 5 wrong passwords lock the account | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T03 | Deactivated account | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T04 | Staff does not see Admin menus | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T05 | Missing required field | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T06 | Age 59 | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T07 | No consent | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T08 | Same OSCA ID twice | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T09 | No face in camera | Auto (fake camera) | Pass; webcam check not run | 11/03 | Claude Code (for Tagalicud) |
+| T10 | Printed photo held up | Hand (webcam) | Not run yet | | |
+| T11 | 3 failed tries, then manual verification | Auto (fake camera) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T12 | Same face registered again | Auto (API, made-up face vectors) | Pass; webcam check not run | 11/03 | Claude Code (for Tagalicud) |
+| T13 | Registered member faces camera | Auto (API, made-up face vectors) | Pass; webcam check not run | 11/03 | Claude Code (for Tagalicud) |
+| T14 | Unregistered person | Auto (API, made-up face vectors) | Pass; webcam check not run | 11/03 | Claude Code (for Tagalicud) |
+| T15 | Face models fail to load | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T16 | Claim again within 90 days | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T17 | Deactivated beneficiary | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T18 | Program inactive | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T19 | Verification failed | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T20 | Representative claim | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T21 | Name not found | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T22 | No claims yet | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T23 | Deactivate with ongoing transaction | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T24 | Any edit writes an audit row | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T25 | Duplicate username | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T26 | Admin deactivates self | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T27 | Filter with no results | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T28 | Export CSV | Auto + Hand (Excel) | Pass | 11/03 | Claude Code (for Tagalicud) |
+
+### Whole-system checks
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| Text is 18px or larger on every screen (login, 7 Staff screens, 6 Admin screens) at 1280 x 720, 1366 x 768 and 1920 x 1080 | Script (measures every visible text) + Hand (screenshots) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Text contrast is at least 4.5:1 | Script + colour check | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| No screen scrolls sideways, and every table fits its box | Script at the same three sizes | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Every page uses `requirePageUser()`, every API route uses `requireApiUser()`, and Admin-only ones pass `"ADMIN"` | Code check + Auto (every page and API route, signed out and as Staff) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| No real personal data in the repo | File and history check | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| `.env` is not committed and `.env.example` lists every variable | File and history check | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Final checks: `npm test` (43), `npm run lint`, `npx tsc --noEmit`, `npm run build`, Playwright (42) on a production server | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Decision (with Tagalicud): text is at least 18px on every screen, as `AGENTS.md` asks. This laptop runs 1920 x 1080 at 150% scaling, so the browser is 1280px wide. At that width the old root size `clamp(14px, 0.8333vw, 16px)` gave 14px, and 66-98% of the text on each screen was under 18px (smallest 9.6px, the Admin table headers). The root size is now 18px, and no text style is smaller than 1rem. Text is larger than in the Figma file.
+- To fit the larger text at 1280px:
+  - The staff sidebar is narrower.
+  - Staff page and card padding is smaller on screens under 1536px.
+  - The dashboard number cards show two per row.
+  - Table headers can wrap onto two lines.
+  - The record list's View, Edit and Deactivate links can wrap; Deactivate used to be hidden past the table's right edge.
+  - The back button is bigger.
+- Contrast: grey "muted" text was 4.1-4.4:1 on the page and table-header backgrounds. It is now darker (5.4:1 or better). The greyed-out Edit and Deactivate links on inactive records stay light on purpose; WCAG does not require contrast for disabled controls.
+- Decision (with Tagalicud): the login page used a real photo of identifiable seniors (`public/images/login-seniors.png`), committed to the public repo. It is removed, and the sign-in form now sits on a plain panel. The photo is still in older commits; removing it from history needs a history rewrite and force push, which was not done.
+- Bug fixed: the register page relied only on the shared layout's sign-in check. It now calls `requirePageUser()` like every other page. A new test checks every page and API route signed out (sent to login, or 401) and as Staff (Admin pages and APIs refused).
+- The Admin header showed "OSCA Administrator, OSCA Administrator". It now shows the account name once, next to the "System Administrator" badge.
+- `.env` and `prisma/dev.db` were never committed. `.env.example` lists every variable the code and seed read. No real emails or phone numbers are in tracked files. Test data uses made-up names only.
+- Not done here: T10 and the webcam halves of T09 and T12-T14 still need a person in front of the camera. The dashboard greets "Good evening, OSCA" because it uses the first word of the account name. Search still treats "Ñ" and "ñ" as different letters (module 2). Both are left for section 13.
 - Tests ran against a separate database; the real `dev.db` was not touched.
