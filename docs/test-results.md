@@ -45,3 +45,20 @@ Notes:
 
 Notes:
 - Bug fixed: on Edit account, a new password under 8 characters showed "Please fix the highlighted fields." but no field was highlighted. The password and full name fields now show their error message.
+
+## 4. Verify Senior Citizen Identity (3.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T13 a registered member faces the camera and the match is confirmed | Hand (webcam) | Not run yet | | |
+| T14 an unregistered person gets "no match" and manual ID is offered | Hand (webcam) | Not run yet | | |
+| Match logic: a near-identical face vector matches the right record; an unrelated one gets no match | Auto (API, made-up face vectors) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T15 face models fail to load, so manual ID is offered | Auto (model files blocked in the browser) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| A record with no face data is flagged and verified through manual ID | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Ambiguous match: a face close to two records returns both and asks for extra verification | Auto (API) | Pass | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Bug fixed: when the model files could not be loaded, the face library only logged the errors, so the screen stayed on "Starting camera and loading face models..." and never offered manual ID. `FaceCamera` now checks that every model loaded and switches to manual ID if not. With the models present, loading still works.
+- The automated face checks use made-up number vectors instead of a camera, so they test the matching and the screens around it, not the face reading itself. T13 and T14 still need a person in front of the webcam.
+- The ambiguous screen (the warning and the two records) is only reached through the camera, so it was checked through the API, not on screen.
+- Tests ran against a separate database (`DATABASE_URL` pointing to a scratch file); the real `dev.db` was not touched.

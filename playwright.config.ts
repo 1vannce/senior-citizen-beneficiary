@@ -6,7 +6,11 @@ export default defineConfig({
   workers: 1,
   expect: { timeout: 15_000 },
   timeout: 60_000, // the dev server compiles pages on first visit
-  use: { baseURL: "http://localhost:3000" },
+  use: {
+    baseURL: "http://localhost:3000",
+    // A fake camera, so the face screens start without a webcam or a permission prompt
+    launchOptions: { args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] },
+  },
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000/login",
