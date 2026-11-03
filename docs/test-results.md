@@ -133,3 +133,26 @@ Notes:
 - The "Continue to record assistance" button on the Check Eligibility screen does not carry the selected senior into Record Assistance. This is intended: identity must be verified again at the release counter.
 - Finding for module 10: the claims report shows `releasedAt` as a UTC date, so a claim released before 8 AM Manila time is listed under the day before. The From and To filters use the server's local time.
 - Tests ran against a separate database; the real `dev.db` was not touched.
+
+## 9. Manage Senior Citizen Records (7.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T23 deactivating right after a claim is blocked with the "transaction from the last 10 minutes" message; the record stays active and no log row is written | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T24 an edit, a deactivation and a reactivation each write a change-log row with the user, date and time, action and reason; an edit also names the fields it changed | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Saving an edit with no change is refused ("No changes to save."), so no empty log row is written | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| A deactivated record leaves the masterlist and the Active filter, appears in the inactive report, and keeps its past claims in history and in the claims report | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Staff cannot open the record page (sent to the dashboard), and the edit, status and face-removal APIs refuse a Staff session (403) | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Decision: reactivate | Hand + Auto (T24) | Kept | 11/03 | Claude Code (for Tagalicud) |
+| Every registration field can be edited from Manage Records with the registration rules | Auto + unit + Hand (screenshot) | Pass (new) | 11/03 | Claude Code (for Tagalicud) |
+| Remove face data on withdrawal of consent: needs a reason, deletes the face template, flags the record for manual ID, keeps the record and logs the change | Auto + Hand (screenshot) | Pass (new) | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Decision (with Tagalicud): keep the Reactivate action. It was already built: Admin only, needs a reason, and is written to the change log as "Reactivated beneficiary".
+- Decision (with Tagalicud): the details saved since Module 5 can now be edited too (suffix, birthplace, civil status, email, emergency contact and ID details). The edit uses the same rules as registration. The address is edited as one field because city and province were saved inside it.
+- Decision (with Tagalicud): new "Remove face data" action on the record page, for a senior who withdraws consent under RA 10173. There is no way yet to capture a face again for an existing record if the senior consents later.
+- Bug fixed: the change log's column was labelled "Field" but showed codes such as "UPDATE". It is now "Action" with readable labels ("Updated beneficiary"). The reason of an edit now ends with the fields that changed, for example "Corrected contact details (changed: Civil status, Email address)". The labels are shared with the dashboard's activity list (`ACTION_LABELS` in `src/lib/constants.ts`).
+- The ongoing-transaction rule is now a separate function (`isOngoingTransaction` in `src/lib/beneficiaries.ts`) with unit tests, as `AGENTS.md` asks. A claim exactly 10 minutes old still blocks deactivation, as before.
+- Deactivating with the reason "Other" saves only the word "Other". There is no box to describe it.
+- Finding for section 11: on long pages the dark sidebar background stops at the bottom of the screen instead of running to the end of the page.
+- Tests ran against a separate database; the real `dev.db` was not touched.
