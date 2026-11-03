@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireApiUser } from "@/lib/session";
 import { fullName } from "@/lib/beneficiaries";
+import { isoDate } from "@/lib/format";
+import { releasedBetween } from "@/lib/reports";
 
 // Generate Reports (UC 8.0). The masterlist has ACTIVE records, the inactive report the rest.
 export async function GET(req: Request) {
@@ -39,17 +41,14 @@ export async function GET(req: Request) {
       where: {
         ...(programId ? { programId } : {}),
         ...(barangay ? { beneficiary: { barangay } } : {}),
-        releasedAt: {
-          ...(from ? { gte: new Date(`${from}T00:00:00`) } : {}),
-          ...(to ? { lte: new Date(`${to}T23:59:59.999`) } : {}),
-        },
+        releasedAt: releasedBetween(from, to),
       },
       include: { program: true, beneficiary: true },
       orderBy: { releasedAt: "desc" },
     });
     return NextResponse.json({
       rows: claims.map((c) => ({
-        releasedAt: c.releasedAt.toISOString().slice(0, 10),
+        releasedAt: isoDate(c.releasedAt),
         referenceNo: c.beneficiary.referenceNo,
         beneficiary: fullName(c.beneficiary),
         barangay: c.beneficiary.barangay,
