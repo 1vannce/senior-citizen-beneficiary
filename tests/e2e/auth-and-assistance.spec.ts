@@ -122,6 +122,33 @@ test("assistance journey with manual ID: verify, eligibility, record, history", 
   await expect(page.getByRole("cell", { name: "Medical" }).first()).toBeVisible();
 });
 
+async function searchHistory(page: Page, q: string) {
+  await page.goto("/history");
+  await page.getByLabel("Search beneficiary").fill(q);
+  await page.getByRole("button", { name: "Search" }).click();
+}
+
+test("T21 unknown name shows no record", async ({ page }) => {
+  await loginOk(page, "staff1", "Staff@123");
+  await searchHistory(page, "Nonexistent Person");
+  await expect(page.getByText("No record found.")).toBeVisible();
+});
+
+test("T22 beneficiary with no claims shows no assistance history", async ({ page }) => {
+  await loginOk(page, "staff1", "Staff@123");
+  await searchHistory(page, "Jose");
+  await page.getByRole("link", { name: /Jose Dela Cruz Garcia/ }).click();
+  await expect(page.getByText("No assistance history for this beneficiary.")).toBeVisible();
+});
+
+test("history search accepts partial names, any letter case and full names", async ({ page }) => {
+  await loginOk(page, "staff1", "Staff@123");
+  for (const q of ["ros", "ROSARIO", "rosario lopez"]) {
+    await searchHistory(page, q);
+    await expect(page.getByRole("link", { name: /Rosario Mendoza Lopez/ })).toBeVisible();
+  }
+});
+
 test("T16 repeat claim inside the restricted period is ineligible", async ({ page }) => {
   await loginOk(page, "staff1", "Staff@123");
   await verifyByManualId(page, "Maria");

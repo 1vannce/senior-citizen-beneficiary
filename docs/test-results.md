@@ -18,3 +18,16 @@ All runs use the seed data (`npm run db:seed`) and a production build (`npm run 
 Notes:
 - The idle test moves the browser clock forward instead of waiting 15 real minutes. The server session also expires after 15 minutes (`maxAge` in `src/lib/auth.ts`).
 - Usability finding for section 11: login text is 14px and the error message is 13px at 1024px wide, below the 18px minimum in `AGENTS.md`. The root font is `clamp(14px, 0.8333vw, 16px)` in `globals.css`, so this affects every screen.
+
+## 2. View Assistance History (6.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T21 a name that does not exist shows "No record found." | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T22 a beneficiary with no claims shows "No assistance history for this beneficiary." | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| A claim recorded in Record Assistance appears in history right away | Auto (assistance journey test) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Search works with partial names, any letter case and full names | Auto + Hand | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Bug fixed: searching a full name such as "Maria Reyes" returned "No record found." because the whole text was compared with each name field. The search now matches each word separately (`searchWhere` in `src/lib/beneficiaries.ts`, unit test in `tests/unit/beneficiaries.test.ts`). This also fixes the Manual ID search on the Verify and Record Assistance screens, which use the same API.
+- Letter case is ignored for A-Z only. SQLite treats "Ñ" and "ñ" as different, so a search for "peña" will not find "PEÑA".
