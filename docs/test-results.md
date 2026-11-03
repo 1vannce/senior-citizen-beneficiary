@@ -30,7 +30,7 @@ Notes:
 
 Notes:
 - Bug fixed: searching a full name such as "Maria Reyes" returned "No record found." because the whole text was compared with each name field. The search now matches each word separately (`searchWhere` in `src/lib/beneficiaries.ts`, unit test in `tests/unit/beneficiaries.test.ts`). This also fixes the Manual ID search on the Verify and Record Assistance screens, which use the same API.
-- Letter case is ignored for A-Z only.
+- Letter case is ignored for A-Z only. SQLite treats "Ñ" and "ñ" as different, so a search for "peña" will not find "PEÑA".
 
 ## 3. Manage User Accounts (9.0)
 
@@ -44,4 +44,4 @@ Notes:
 | Password must be at least 8 characters, on create and on edit | Auto + Hand | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
 
 Notes:
-- Bug fixed: on Edit account, a new password under 8 characters showed "Please fix the highlighted fields." but no field was highlighted. The password and full name fields now show their error message. SQLite treats "Ñ" and "ñ" as different, so a search for "peña" will not find "PEÑA".
+- Bug fixed: on Edit account, a new password under 8 characters showed "Please fix the highlighted fields." but no field was highlighted. The password and full name fields now show their error message.
