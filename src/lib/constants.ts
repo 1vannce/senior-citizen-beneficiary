@@ -16,6 +16,7 @@ export const ACTION_LABELS: Record<string, string> = {
   UPDATE: "Updated beneficiary",
   DEACTIVATE: "Deactivated beneficiary",
   REACTIVATE: "Reactivated beneficiary",
+  CAPTURE_FACE: "Captured face data",
   REMOVE_FACE: "Removed face data",
   RELEASE_ASSISTANCE: "Released assistance",
   CREATE_USER: "Created account",

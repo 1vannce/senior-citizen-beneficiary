@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { beneficiaryEditSchema } from "@/lib/validators";
 import { BARANGAYS, CIVIL_STATUSES, ID_TYPES } from "@/lib/constants";
 import { Field, Modal, PageHeader, StatusBadge } from "@/components/ui";
+import FaceCamera from "@/components/face/FaceCamera";
 import type { z } from "zod";
 
 type EditForm = z.infer<typeof beneficiaryEditSchema>;
@@ -41,6 +42,9 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
   const [faceDialog, setFaceDialog] = useState(false);
   const [faceReason, setFaceReason] = useState("");
   const [faceError, setFaceError] = useState("");
+  const [capturing, setCapturing] = useState(false);
+  const [captureConsent, setCaptureConsent] = useState(false);
+  const [captureError, setCaptureError] = useState("");
 
   const {
     register,
@@ -100,6 +104,26 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
       setMessage({ type: "ok", text: `Face data of ${name} removed. The record is flagged for manual ID verification.` });
       router.refresh();
     } else setFaceError(body.error ?? "Could not remove face data.");
+  }
+
+  function closeCapture() {
+    setCapturing(false);
+    setCaptureConsent(false);
+    setCaptureError("");
+  }
+
+  async function captureFace(embedding: number[]) {
+    const res = await fetch(`/api/beneficiaries/${id}/face`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ consent: true, embedding }),
+    });
+    const body = await res.json();
+    if (res.ok) {
+      closeCapture();
+      setMessage({ type: "ok", text: `Face data of ${name} captured. The senior can now be verified by face match.` });
+      router.refresh();
+    } else setCaptureError(body.existing ? `${body.error} (${body.existing.name}, ${body.existing.referenceNo})` : (body.error ?? "Could not save face data."));
   }
 
   const f = (name: keyof EditForm) => `input ${errors[name] ? "input-error" : ""}`;
@@ -339,11 +363,47 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
               Remove face data
             </button>
           )}
+          {!consentDate && active && !capturing && (
+            <button className="btn btn-secondary" onClick={() => setCapturing(true)}>
+              Capture face data
+            </button>
+          )}
         </div>
         <p className="text-sm text-ink">
           Consent status: {consentDate ? "Granted" : "Not recorded"}
           {consentDate && <span className="ml-6 text-xs text-muted">Consent date: {consentDate}</span>}
         </p>
+        {capturing && (
+          <div className="space-y-4 border-t border-line pt-4">
+            <p className="rounded-xl bg-page p-4 text-sm text-muted">
+              Read the facial data privacy notice to the senior first. Only a numeric face template is stored, never a photo,
+              and the senior may withdraw consent at any time.
+            </p>
+            {captureError && (
+              <p role="alert" className="alert alert-error">
+                {captureError}
+              </p>
+            )}
+            <label className="flex items-center gap-3 font-semibold text-ink">
+              <input type="checkbox" className="size-5" checked={captureConsent} onChange={(e) => setCaptureConsent(e.target.checked)} />
+              The senior freely gave consent after hearing the privacy notice.
+            </label>
+            {captureConsent && !captureError && (
+              <div className="max-w-lg">
+                <FaceCamera
+                  actionLabel="Capture facial data"
+                  hint="Ask the senior to face the camera and keep still."
+                  onCapture={captureFace}
+                  onGiveUp={() => setCaptureError("Face capture failed 3 times. The record stays on manual ID verification.")}
+                  onUnavailable={(why) => setCaptureError(`${why} The record stays on manual ID verification.`)}
+                />
+              </div>
+            )}
+            <button type="button" className="link-action" onClick={closeCapture}>
+              Cancel
+            </button>
+          </div>
+        )}
       </section>
 
       {faceDialog && (
