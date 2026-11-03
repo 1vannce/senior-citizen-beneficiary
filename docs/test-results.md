@@ -100,3 +100,19 @@ Notes:
 - No photo, database: no table has a binary column, no stored text contains image data, and every `FaceData.embedding` is a list of numbers. Project folder: the only image files are the two UI images in `public/images/`. Request: `FaceCamera` only passes `face.embedding`, which the face library returns as a plain list of 1024 numbers (`Array.from` in its `faceres` code); no code turns a video frame into an image. The request with a real captured face was not inspected; check it in the browser's Network tab when registering the group members.
 - In T11 the use case's "Cancel" is the "No, continue with manual verification" choice. After 3 failed tries the camera closes and only manual verification can continue.
 - Tests ran against a separate database; the real `dev.db` was not touched (still 3 users, 4 programs, 0 seniors).
+
+## 7. Check Eligibility (4.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T16 a second Pension claim inside 90 days is ineligible (Maria Santos Reyes), with the date she is eligible again | Auto (eligibility screen and assistance journey) + unit + Hand (screenshot) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T17 a deactivated beneficiary is ineligible | Auto + unit | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T18 the inactive Burial program makes no check and shows "No eligibility check was made" | Auto + unit + Hand (screenshot) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Boundary: a claim on 1 Aug with a 90-day period is ineligible until the end of 29 Oct and eligible from the start of 30 Oct, at any time of day | Unit | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Bug fixed (boundary): the rule added exactly 90 × 24 hours to the time of the last claim. A claim at 3 PM on 1 Aug was still blocked at 9 AM on 30 Oct, while the message said "Eligible again on 10/30/2026". The date was also shown in the server's time zone. The period now counts calendar days in Manila time, so the senior can claim from the start of the date in the message. The message now reads like "Eligible again on Friday, 30 Oct 2026" (`eligibleAgainOn` in `src/lib/eligibility.ts`, unit tests in `tests/unit/eligibility.test.ts`). The same rule is used when recording assistance.
+- Bug fixed (T18 screen): for an inactive program the result said "No eligibility check was made" but still ticked "Active beneficiary record" and "Barangay coverage" as passed. Those checks now show "Not checked."
+- T17 deactivates a new made-up record through the admin API, so the seeded records are not changed.
+- Finding: "Barangay coverage" always passes. There is no barangay rule in the data model, so the check only shows the senior's barangay.
+- Tests ran against a separate database; the real `dev.db` was not touched.
