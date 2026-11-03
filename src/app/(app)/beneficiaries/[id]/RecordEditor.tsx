@@ -37,6 +37,9 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [statusReason, setStatusReason] = useState("");
   const [statusError, setStatusError] = useState("");
+  const [faceDialog, setFaceDialog] = useState(false);
+  const [faceReason, setFaceReason] = useState("");
+  const [faceError, setFaceError] = useState("");
 
   const {
     register,
@@ -75,6 +78,22 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
       setMessage({ type: "ok", text: `${name} ${active ? "deactivated" : "reactivated"}. The change was logged.` });
       router.refresh();
     } else setStatusError(body.error ?? "Could not change status.");
+  }
+
+  async function removeFace() {
+    setFaceError("");
+    const res = await fetch(`/api/beneficiaries/${id}/face`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: faceReason }),
+    });
+    const body = await res.json();
+    if (res.ok) {
+      setFaceReason("");
+      setFaceDialog(false);
+      setMessage({ type: "ok", text: `Face data of ${name} removed. The record is flagged for manual ID verification.` });
+      router.refresh();
+    } else setFaceError(body.error ?? "Could not remove face data.");
   }
 
   const f = (name: keyof EditForm) => `input ${errors[name] ? "input-error" : ""}`;
@@ -307,12 +326,51 @@ export default function RecordEditor({ id, status, name, referenceNo, consentDat
       </section>
 
       <section className="card mt-6 space-y-2">
-        <h2 className="card-title">Facial data</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="card-title">Facial data</h2>
+          {consentDate && (
+            <button className="btn btn-secondary" onClick={() => setFaceDialog(true)}>
+              Remove face data
+            </button>
+          )}
+        </div>
         <p className="text-sm text-ink">
           Consent status: {consentDate ? "Granted" : "Not recorded"}
           {consentDate && <span className="ml-6 text-xs text-muted">Consent date: {consentDate}</span>}
         </p>
       </section>
+
+      {faceDialog && (
+        <Modal
+          title={`Remove face data of ${name}?`}
+          badge="Consent withdrawal"
+          onClose={() => {
+            setFaceDialog(false);
+            setFaceError("");
+          }}
+        >
+          <p className="rounded-xl bg-page p-4 text-sm text-muted">
+            Use this when the senior withdraws consent. The stored face template is deleted and cannot be restored. The senior
+            will be verified by manual ID from now on. The record and its past claims are kept.
+          </p>
+          {faceError && (
+            <p role="alert" className="alert alert-error">
+              {faceError}
+            </p>
+          )}
+          <Field label="Reason for removal *">
+            <input className="input" value={faceReason} onChange={(e) => setFaceReason(e.target.value)} />
+          </Field>
+          <div className="flex justify-end gap-3 border-t border-line pt-5">
+            <button className="btn btn-secondary" onClick={() => setFaceDialog(false)}>
+              Cancel
+            </button>
+            <button className="btn btn-danger" disabled={!faceReason.trim()} onClick={removeFace}>
+              Remove face data
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {dialog && (
         <Modal
