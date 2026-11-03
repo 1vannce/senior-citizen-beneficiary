@@ -116,3 +116,20 @@ Notes:
 - T17 deactivates a new made-up record through the admin API, so the seeded records are not changed.
 - Finding: "Barangay coverage" always passes. There is no barangay rule in the data model, so the check only shows the senior's barangay.
 - Tests ran against a separate database; the real `dev.db` was not touched.
+
+## 8. Record Assistance (5.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T19 failed verification blocks saving: on screen identity cannot be confirmed without the ID check; through the API, a missing ID check, a missing face, an unknown face or another person's face is refused (403) and nothing is saved | Auto (screen + API, made-up face vectors) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T20 a representative claim skips the face step, needs the representative's name and the ID and authorization check, and is saved as "Representative" | Auto + Hand (screenshot) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| Saving is refused when eligibility fails: the screen does not open the release form, and calling `/api/assistance` directly is refused (409) for a repeat claim, an inactive program and a deactivated record | Auto (screen + API) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| The same claim saved several times at once is recorded only once | Auto (4 requests at the same moment) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| The new claim shows in the beneficiary's history (module 2) with the representative's name, and in the claims report (module 10) | Auto (T20 + assistance journey) | Pass | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Bug fixed: the eligibility check ran before the save, outside the database transaction. Four Save requests sent together (a double click on a slow laptop, or two counters) were all accepted. That recorded 4 Grocery claims for one senior inside the 30-day period. The check now runs inside the same transaction as the save (`evaluateEligibility` in `src/lib/claims.ts` takes the transaction client). Now 1 request is saved and the other 3 get "not eligible" (409). This was checked 3 times by hand and is covered by a new Playwright test.
+- A real face-match claim (verification method FACE) was checked through the API with made-up face vectors, not with the webcam.
+- The "Continue to record assistance" button on the Check Eligibility screen does not carry the selected senior into Record Assistance. This is intended: identity must be verified again at the release counter.
+- Finding for module 10: the claims report shows `releasedAt` as a UTC date, so a claim released before 8 AM Manila time is listed under the day before. The From and To filters use the server's local time.
+- Tests ran against a separate database; the real `dev.db` was not touched.
