@@ -156,3 +156,23 @@ Notes:
 - Deactivating with the reason "Other" saves only the word "Other". There is no box to describe it.
 - Finding for section 11: on long pages the dark sidebar background stops at the bottom of the screen instead of running to the end of the page.
 - Tests ran against a separate database; the real `dev.db` was not touched.
+
+## 10. Generate Reports (8.0)
+
+| Check | How | Result | Date | Tester |
+|---|---|---|---|---|
+| T27 a filter with no results shows "No matching records." and no export buttons | Auto | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T28 the exported CSV has the same headers, rows and values as the masterlist on screen | Auto (download compared with the table) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| T28 the exported CSV has the same headers, rows and values as the claims report on screen | Auto (download compared with the table) | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Deactivated beneficiaries are not in the masterlist and are in the inactive report | Auto (screen + API, also module 9) | Pass | 11/03 | Claude Code (for Tagalicud) |
+| The CSV opens in Excel with ñ, names with commas ("Señora Ñora dela Cruz Peña, Jr.") and "PHP 1,500" each in one cell | Hand (Excel 16 on this laptop, made-up record) + unit | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+| Claim dates and the From/To filter follow Manila time | Unit | Pass after fix | 11/03 | Claude Code (for Tagalicud) |
+
+Notes:
+- Bug fixed (T28): the claims report showed only a summary by program on screen, while the CSV had one row per claim. The screen now also lists every claim under "Claims released", with the same columns as the CSV.
+- Bug fixed (Excel): the CSV had no byte order mark, so Excel read it with the Windows code page and showed "ñ" as "Ã±". The export now adds the mark (`toCsv` in `src/lib/reports.ts`). It also stops a value that starts with = + - @ from running as an Excel formula.
+- Bug fixed (dates): the claims report showed release dates in UTC and filtered by the server's clock. A claim released before 8 AM Manila time showed under the day before. Dates and the From/To filter now use Manila days (`releasedBetween` in `src/lib/reports.ts`).
+- Bug fixed: the "Verified by" column showed codes such as "MANUAL_ID". It now reads "Manual ID", "Face match" or "Representative (name)", the same labels as the assistance history (`verifiedBy` in `src/lib/format.ts`).
+- In Excel the date columns show "########" until the column is widened. The values are real dates (shown as 03/11/2026 with this laptop's settings).
+- "Export PDF" opens the print window, where the user picks "Save as PDF". There is no separate PDF file.
+- Tests ran against a separate database; the real `dev.db` was not touched.
