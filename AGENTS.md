@@ -41,7 +41,7 @@ Accounts: `admin` (ADMIN), `staff1` and `staff2` (STAFF). `db:seed` reads their 
 - Every change to a record writes an `AuditLog` row via `writeAudit()` with user, action, entity and reason. Pass the transaction client when inside `db.$transaction`.
 - Beneficiaries and users are **deactivated, never deleted**, so past claims stay.
 - Store face **embeddings only**, never photos. One `FaceData` per beneficiary, with the consent date.
-- Styling follows the Figma file. Staff and Admin use `.theme-staff` / `.theme-admin` CSS variables in `globals.css`. Sizes are in rem. Keep text large and high contrast (older users, 18px minimum).
+- Styling follows the Figma file. Staff and Admin use `.theme-staff` / `.theme-admin` CSS variables in `globals.css`. Sizes are in rem and 1rem is 12px (the UI is scaled to 2/3; the Tailwind breakpoints are scaled with it). No text below 1rem; keep high contrast.
 - Read `node_modules/next` docs or existing code before using Next 15 / React 19 APIs; do not assume older behavior.
 - Match existing naming, formatting and comment density. Keep changes small and focused; no new dependencies without a clear need.
 

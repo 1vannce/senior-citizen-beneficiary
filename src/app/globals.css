@@ -73,14 +73,14 @@
   --eyebrow-color: var(--muted);
 }
 
-/* Laptop screens (under 1536px wide) get tighter staff cards so wide tables fit without scrolling. */
-@media (max-width: 1535px) {
+/* Laptop screens (under the 2xl breakpoint) get tighter staff cards so wide tables fit without scrolling. */
+@media (max-width: 1023px) {
   .theme-staff {
     --card-pad: 1.75rem;
   }
 }
 
-/* Older users need text of at least 18px (AGENTS.md), so the small text steps are raised to 1rem. */
+/* The small text steps are raised to 1rem so no text is smaller than the base size. */
 @theme {
   --text-xs: 1rem;
   --text-xs--line-height: 1.5;
@@ -107,10 +107,20 @@
   --font-inter: var(--inter), Arial, Helvetica, sans-serif;
 }
 
-/* All sizes are in rem and 1rem is 18px, the smallest text size for older users (AGENTS.md).
-   The Figma frames used 16px, so text is larger than in Figma and the layouts are adjusted to fit. */
+/* All sizes are in rem. 1rem was 18px, which looked too big on the laptop, so the whole UI is
+   scaled to 2/3 (12px), the same as zooming the browser to 67%. */
 html {
-  font-size: 18px;
+  font-size: 12px;
+}
+
+/* Media queries ignore the html font size, so the breakpoints are scaled to 2/3 as well.
+   This keeps each layout switching where it would at 67% browser zoom. */
+@theme {
+  --breakpoint-sm: 26.6667rem;
+  --breakpoint-md: 32rem;
+  --breakpoint-lg: 42.6667rem;
+  --breakpoint-xl: 53.3333rem;
+  --breakpoint-2xl: 64rem;
 }
 
 body {
