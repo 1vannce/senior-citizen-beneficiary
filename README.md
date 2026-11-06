@@ -6,6 +6,8 @@ Senior Citizen Beneficiary Verification System, the PC-317 IHCI final project.
 
 Next.js 15, TypeScript, Tailwind, Prisma + SQLite, next-auth (credentials), `@vladmandic/human` (in-browser face recognition).
 
+New to the code? [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) explains every folder and shows where each use case lives.
+
 ## Run
 
 Needs Node.js 20+, a webcam, and Chrome or Edge.
