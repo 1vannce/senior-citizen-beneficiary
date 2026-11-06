@@ -2,6 +2,8 @@
 
 Senior Citizen Beneficiary Verification System, the PC-317 IHCI final project.
 
+> **Project architecture:** [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) explains every folder in plain language, with comments, a request walkthrough, and a "where to find things" table, plus where each use case lives in the code.
+
 **Privacy:** real senior citizen records are entered through the app and stay in the local database (`prisma/dev.db`, not committed). Never put real personal data in this repository; it is public.
 
 Next.js 15, TypeScript, Tailwind, Prisma + SQLite, next-auth (credentials), `@vladmandic/human` (in-browser face recognition).
